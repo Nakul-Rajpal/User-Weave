@@ -1,0 +1,2 @@
+create a hero section with two buttons for signup and login.
+make the design like facebook page.

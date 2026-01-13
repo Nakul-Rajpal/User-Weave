@@ -1,0 +1,19 @@
+diff --git a/src/stream.cjs b/src/stream.cjs
+index b058e5eef74f165a50768000a6fb98d023598953..d4ef4290bcb6f3e9f0add0fee56b67c7c4e3ae19 100644
+--- a/src/stream.cjs
++++ b/src/stream.cjs
+@@ -1 +1,13 @@
+-module.exports = require("web-streams-polyfill/ponyfill");
++// Check if we're running on Node.js 18+ which has native Web Streams support
++const nodeVersion = parseInt(process.versions.node.split('.')[0], 10);
++
++// Use native streams on Node.js 18+ (Vercel uses Node 22)
++// This avoids mixing native and polyfilled streams which causes:
++// "TypeError: First parameter has member 'readable' that is not a ReadableStream"
++if (nodeVersion >= 18) {
++  // Native Web Streams API available since Node.js 16.5.0, stable in 18+
++  module.exports = require('stream/web');
++} else {
++  // Fallback to polyfill for older Node versions
++  module.exports = require('web-streams-polyfill/ponyfill');
++}

@@ -1,0 +1,45 @@
+services:
+  # Main Application (Node.js/Remix)
+  - type: web
+    name: research-video-platform
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm run dockerstart
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: LIVEKIT_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  # Transcription Agent (Python Web Service with Background Worker)
+  - type: web
+    name: transcription-agent
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./agents/Dockerfile
+    dockerContext: ./agents
+    healthCheckPath: /health
+    envVars:
+      - key: LIVEKIT_WS_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false

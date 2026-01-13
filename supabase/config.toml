@@ -1,0 +1,48 @@
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "bolt-chat"
+
+[api]
+  enabled = true
+  port = 54321
+  schemas = ["public", "graphql_public"]
+  extra_search_path = ["public", "extensions"]
+  max_rows = 1000
+
+[auth]
+  enabled = true
+  site_url = "http://localhost:5173"
+  additional_redirect_urls = []
+  jwt_expiry = 3600
+  jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+  enable_signup = true
+  enable_anonymous_sign_ins = false
+
+[db]
+  port = 54323
+  shadow_port = 54324
+  major_version = 15
+
+[studio]
+  enabled = true
+  port = 54325
+  api_url = "http://localhost:54325"
+
+[inbucket]
+  enabled = true
+  port = 54326
+  smtp_port = 54327
+  pop3_port = 54328
+
+[storage]
+  enabled = true
+  file_size_limit = "50MiB"
+
+[edge_runtime]
+  enabled = true
+  inspector_port = 54331
+
+[analytics]
+  enabled = false
+  port = 54332
+  vector_port = 54333

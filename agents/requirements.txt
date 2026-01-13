@@ -1,0 +1,6 @@
+livekit
+livekit-agents
+livekit-plugins-deepgram
+python-dotenv
+asyncio
+aiohttp

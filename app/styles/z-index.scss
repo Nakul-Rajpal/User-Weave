@@ -1,0 +1,45 @@
+$zIndexMax: 999;
+
+.z-logo {
+  z-index: $zIndexMax - 1;
+}
+
+.z-sidebar {
+  z-index: $zIndexMax - 2;
+}
+
+.z-port-dropdown {
+  z-index: $zIndexMax - 3;
+}
+
+.z-iframe-overlay {
+  z-index: $zIndexMax - 4;
+}
+
+.z-video-strip {
+  z-index: 10;
+}
+
+.z-prompt {
+  z-index: 2;
+}
+
+.z-workbench {
+  z-index: 3;
+}
+
+.z-file-tree-breadcrumb {
+  z-index: $zIndexMax - 1;
+}
+
+.z-max {
+  z-index: $zIndexMax;
+}
+
+// Meeting coding mode: adjust workbench position for video strip
+[data-meeting-coding-mode='true'] {
+  .z-workbench > div {
+    // Add 8rem to account for video strip at top
+    top: calc(var(--header-height) + 1.2rem + 8rem) !important;
+  }
+}

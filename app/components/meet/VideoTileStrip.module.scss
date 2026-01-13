@@ -1,0 +1,84 @@
+// Custom styles for VideoTileStrip to constrain LiveKit components
+.videoTileStripContainer {
+  // Force strict height constraint - override LiveKit's height: 100%
+  height: 8rem; // 128px (h-32)
+  max-height: 8rem;
+  min-height: 8rem;
+  flex-shrink: 0; // Prevent flex container from shrinking this
+  overflow: hidden; // Prevent content from expanding beyond bounds
+  position: relative;
+  z-index: 10; // Ensure it doesn't overlay main content but stays above background
+
+  // Override LiveKit's .lk-room-container styles that apply height: 100%
+  :global(.lk-room-container) {
+    height: 8rem !important;
+    max-height: 8rem !important;
+    min-height: auto !important;
+    position: relative !important; // Prevent fixed positioning
+  }
+
+  // Ensure control bar fits within the strip
+  :global(.lk-control-bar) {
+    padding: 0.25rem !important;
+    height: auto !important;
+    min-height: auto !important;
+    background: transparent !important; // Inherit parent background
+  }
+
+  // Make control bar buttons smaller to fit
+  :global(.lk-button) {
+    padding: 0.375rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  // Prevent LiveKit overlays from escaping or covering content
+  :global(.lk-toast),
+  :global(.lk-device-menu) {
+    position: absolute !important;
+    top: auto !important;
+    bottom: 100% !important; // Show above the strip
+    z-index: 1000 !important; // Ensure they're visible when shown
+  }
+
+  // Constrain grid layout if used
+  :global(.lk-grid-layout) {
+    height: 100% !important;
+    max-height: 8rem !important;
+  }
+}
+
+// Wrapper for content inside the strip
+.stripContent {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+// Video tiles container
+.tilesContainer {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  flex: 1;
+  height: 100%;
+
+  // Hide scrollbar for cleaner look
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+}
+
+// Controls container
+.controlsContainer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}

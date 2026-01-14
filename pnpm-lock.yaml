@@ -217,6 +217,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
+      fast-glob:
+        specifier: ^3.3.2
+        version: 3.3.3
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -431,9 +434,6 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.2.6
         version: 5.5.4(eslint-config-prettier@10.1.8(eslint@9.38.0(jiti@1.21.7)))(eslint@9.38.0(jiti@1.21.7))(prettier@3.6.2)
-      fast-glob:
-        specifier: ^3.3.2
-        version: 3.3.3
       husky:
         specifier: 9.1.7
         version: 9.1.7

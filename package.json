@@ -143,7 +143,13 @@
     "util": "^0.12.5",
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-optimize-css-modules": "^1.1.0",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "sass-embedded": "^1.81.0",
+    "typescript": "^5.7.2",
+    "unocss": "^0.61.9",
+    "vite": "^5.4.11",
+    "vite-tsconfig-paths": "^4.3.2"
   },
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",
@@ -159,7 +165,6 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-window": "^1.8.8",
-    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "crypto-browserify": "^3.12.1",
@@ -173,16 +178,10 @@
     "pnpm": "^9.14.4",
     "prettier": "^3.5.3",
     "rimraf": "^4.4.1",
-    "sass-embedded": "^1.81.0",
     "stream-browserify": "^3.0.0",
-    "typescript": "^5.7.2",
     "unified": "^11.0.5",
-    "unocss": "^0.61.9",
     "vercel": "^39.3.2",
-    "vite": "^5.4.11",
     "vite-plugin-copy": "^0.1.6",
-    "vite-plugin-optimize-css-modules": "^1.1.0",
-    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^2.1.7"
   },
   "resolutions": {

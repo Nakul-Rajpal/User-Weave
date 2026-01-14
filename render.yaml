@@ -6,7 +6,7 @@ services:
     region: oregon
     plan: free
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm run dockerstart
+    startCommand: pnpm run start
     envVars:
       - key: NODE_ENV
         value: production

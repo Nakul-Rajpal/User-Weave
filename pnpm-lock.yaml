@@ -145,12 +145,18 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.1.4
         version: 1.2.8(@types/react-dom@18.3.7(@types/react@18.3.26))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remix-run/dev':
+        specifier: ^2.15.2
+        version: 2.17.1(@remix-run/react@2.17.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.1(typescript@5.9.3))(@types/node@16.18.11)(sass-embedded@1.93.2)(sass@1.93.2)(ts-node@10.9.1(@types/node@16.18.11)(typescript@5.9.3))(typescript@5.9.3)(vite@5.4.21(@types/node@16.18.11)(sass-embedded@1.93.2)(sass@1.93.2))
       '@remix-run/node':
         specifier: ^2.15.2
         version: 2.17.1(typescript@5.9.3)
       '@remix-run/react':
         specifier: ^2.15.2
         version: 2.17.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
+      '@remix-run/serve':
+        specifier: ^2.15.2
+        version: 2.17.1(typescript@5.9.3)
       '@supabase/ssr':
         specifier: ^0.7.0
         version: 0.7.0(@supabase/supabase-js@2.76.1)
@@ -362,12 +368,6 @@ importers:
       '@iconify/types':
         specifier: ^2.0.0
         version: 2.0.0
-      '@remix-run/dev':
-        specifier: ^2.15.2
-        version: 2.17.1(@remix-run/react@2.17.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.1(typescript@5.9.3))(@types/node@16.18.11)(sass-embedded@1.93.2)(sass@1.93.2)(ts-node@10.9.1(@types/node@16.18.11)(typescript@5.9.3))(typescript@5.9.3)(vite@5.4.21(@types/node@16.18.11)(sass-embedded@1.93.2)(sass@1.93.2))
-      '@remix-run/serve':
-        specifier: ^2.15.2
-        version: 2.17.1(typescript@5.9.3)
       '@testing-library/jest-dom':
         specifier: ^6.6.3
         version: 6.9.1

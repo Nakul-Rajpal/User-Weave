@@ -31,13 +31,13 @@ console.log('  Starting Remix server...');
 console.log('★═══════════════════════════════════════★\n');
 
 // Run remix-serve with the built files
-const start = spawn('npx', ['remix-serve', './build/server/index.js'], {
+const start = spawn('pnpm', ['exec', 'remix-serve', './build/server/index.js'], {
   stdio: 'inherit',
   env: {
     ...process.env,
     NODE_ENV: process.env.NODE_ENV || 'production',
   },
-  shell: true,
+  shell: false,
 });
 
 start.on('error', (error) => {

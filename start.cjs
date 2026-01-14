@@ -5,7 +5,7 @@
  * from .env.local before starting the server
  */
 
-const { spawn, execSync } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -30,20 +30,12 @@ console.log('  Loading environment variables...');
 console.log('  Starting Remix server...');
 console.log('★═══════════════════════════════════════★\n');
 
-// Find the remix-serve binary path
-let remixServePath;
-try {
-  remixServePath = execSync('pnpm bin', { encoding: 'utf8' }).trim() + '/remix-serve';
-  if (!fs.existsSync(remixServePath)) {
-    // Fallback to node_modules/.bin
-    remixServePath = path.join(__dirname, 'node_modules', '.bin', 'remix-serve');
-  }
-} catch {
-  remixServePath = path.join(__dirname, 'node_modules', '.bin', 'remix-serve');
-}
-
-// Run remix-serve with the built files
-const start = spawn(remixServePath, ['./build/server/index.js'], {
+// Run remix-serve with the built files using Node
+// This way we bypass the need to find the binary
+const start = spawn(process.execPath, [
+  require.resolve('@remix-run/serve/dist/cli.js'),
+  './build/server/index.js'
+], {
   stdio: 'inherit',
   env: {
     ...process.env,

@@ -8,7 +8,6 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
 
 console.log(`
 ★═══════════════════════════════════════★
@@ -31,20 +30,12 @@ console.log('  Loading environment variables...');
 console.log('  Building with Vite...');
 console.log('★═══════════════════════════════════════★\n');
 
-// Find the remix binary path
-let remixPath;
-try {
-  remixPath = execSync('pnpm bin', { encoding: 'utf8' }).trim() + '/remix';
-  if (!fs.existsSync(remixPath)) {
-    // Fallback to node_modules/.bin
-    remixPath = path.join(__dirname, 'node_modules', '.bin', 'remix');
-  }
-} catch {
-  remixPath = path.join(__dirname, 'node_modules', '.bin', 'remix');
-}
-
-// Run remix vite:build with environment variables
-const build = spawn(remixPath, ['vite:build'], {
+// Run remix vite:build with environment variables using Node
+// This way we bypass the need to find the binary
+const build = spawn(process.execPath, [
+  require.resolve('@remix-run/dev/dist/cli.js'),
+  'vite:build'
+], {
   stdio: 'inherit',
   env: {
     ...process.env,

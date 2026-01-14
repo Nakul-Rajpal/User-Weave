@@ -31,7 +31,7 @@ console.log('  Starting Remix server...');
 console.log('★═══════════════════════════════════════★\n');
 
 // Run remix-serve with the built files
-const start = spawn('pnpm', ['exec', 'remix-serve', './build/server/index.js'], {
+const start = spawn('./node_modules/.bin/remix-serve', ['./build/server/index.js'], {
   stdio: 'inherit',
   env: {
     ...process.env,

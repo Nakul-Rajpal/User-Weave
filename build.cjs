@@ -31,7 +31,7 @@ console.log('  Building with Vite...');
 console.log('★═══════════════════════════════════════★\n');
 
 // Run remix vite:build with environment variables
-const build = spawn('pnpm', ['exec', 'remix', 'vite:build'], {
+const build = spawn('./node_modules/.bin/remix', ['vite:build'], {
   stdio: 'inherit',
   env: {
     ...process.env,

@@ -31,9 +31,10 @@ console.log('  Starting Remix server...');
 console.log('★═══════════════════════════════════════★\n');
 
 // Run remix-serve with the built files using Node
-// This way we bypass the need to find the binary
+// Directly reference the CLI module path
+const remixServePath = path.join(__dirname, 'node_modules', '@remix-run', 'serve', 'dist', 'cli.js');
 const start = spawn(process.execPath, [
-  require.resolve('@remix-run/serve/dist/cli.js'),
+  remixServePath,
   './build/server/index.js'
 ], {
   stdio: 'inherit',

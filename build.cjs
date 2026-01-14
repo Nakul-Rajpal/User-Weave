@@ -31,9 +31,10 @@ console.log('  Building with Vite...');
 console.log('★═══════════════════════════════════════★\n');
 
 // Run remix vite:build with environment variables using Node
-// This way we bypass the need to find the binary
+// Directly reference the CLI module path
+const remixCliPath = path.join(__dirname, 'node_modules', '@remix-run', 'dev', 'dist', 'cli.js');
 const build = spawn(process.execPath, [
-  require.resolve('@remix-run/dev/dist/cli.js'),
+  remixCliPath,
   'vite:build'
 ], {
   stdio: 'inherit',

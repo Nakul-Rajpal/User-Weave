@@ -1,11 +1,4 @@
 # collaborative design
-
-
-
-
-
-
-
 ## Features
 
 - **AI-powered full-stack web development** for **NodeJS based applications** directly in your browser.

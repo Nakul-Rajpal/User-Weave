@@ -27,7 +27,22 @@ export default defineConfig((config) => {
     },
     build: {
       target: 'esnext',
+      // Reduce build log noise
+      reportCompressedSize: false,
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress "externalized for browser compatibility" warnings
+          if (warning.message?.includes('externalized for browser compatibility')) return;
+          // Suppress sourcemap warnings
+          if (warning.message?.includes('sourcemap')) return;
+          // Suppress "is imported from external module but never used" warnings
+          if (warning.message?.includes('but never used')) return;
+          warn(warning);
+        },
+      },
     },
+    logLevel: config.mode === 'production' ? 'warn' : 'info',
     ssr: {
       noExternal: ['remix-utils'],
       external: ['@remix-run/node'],

@@ -8,7 +8,6 @@ from livekit.agents import JobContext, WorkerOptions, cli
 from livekit.plugins import deepgram
 from livekit.agents.stt import SpeechEventType
 from dotenv import load_dotenv
-from aiohttp import web
 import threading
 
 load_dotenv()
@@ -240,34 +239,34 @@ async def main(ctx: JobContext):
     agent = TranscriptionAgent()
     await agent.entrypoint(ctx)
 
-# HTTP Server for Render health checks
-async def health_check(request):
-    """Health check endpoint for Render"""
-    return web.json_response({
-        "status": "healthy",
-        "service": "transcription-agent",
-        "timestamp": datetime.now().isoformat()
-    })
+# HTTP Server for Render health checks - runs in background thread
+def run_health_server():
+    """Run a simple HTTP server for health checks in a background thread"""
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    import json
 
-async def start_http_server():
-    """Start HTTP server for health checks"""
-    app = web.Application()
-    app.router.add_get('/health', health_check)
-    app.router.add_get('/', health_check)
+    class HealthHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {
+                "status": "healthy",
+                "service": "transcription-agent",
+                "timestamp": datetime.now().isoformat()
+            }
+            self.wfile.write(json.dumps(response).encode())
 
-    port = int(os.getenv("PORT", 10000))  # Render uses PORT env variable
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', port)
-    await site.start()
-    print(f"🌐 HTTP server running on port {port}")
+        def log_message(self, format, *args):
+            # Suppress default logging
+            pass
 
-    # Keep server running
-    while True:
-        await asyncio.sleep(3600)
+    port = int(os.getenv("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    print(f"🌐 Health check server running on port {port}")
+    server.serve_forever()
 
-def run_transcription_agent():
-    """Run the LiveKit transcription agent in a separate thread"""
+if __name__ == "__main__":
     import sys
 
     # Get environment variables with defaults
@@ -287,11 +286,23 @@ def run_transcription_agent():
     else:
         print(f"🔑 Deepgram API Key: {deepgram_key[:10]}...")
 
+    # Check if running in production (Render sets PORT env variable)
+    is_production = os.getenv("PORT") is not None and "dev" not in sys.argv
+
+    if is_production:
+        print("🚀 Running in PRODUCTION mode (Render)")
+        # Start health check server in background thread
+        health_thread = threading.Thread(target=run_health_server, daemon=True)
+        health_thread.start()
+    else:
+        print("🚀 Running in DEVELOPMENT mode")
+
     # IMPORTANT: Set sys.argv to include 'start' command for production mode
     # This simulates: python transcription_agent.py start
     if 'dev' not in sys.argv:
         sys.argv = ['transcription_agent.py', 'start']
 
+    # Run LiveKit agent in main thread (required for signal handlers)
     cli.run_app(
         WorkerOptions(
             entrypoint_fnc=main,
@@ -300,26 +311,3 @@ def run_transcription_agent():
             ws_url=ws_url
         )
     )
-
-if __name__ == "__main__":
-    import sys
-
-    # Check if running in production (Render sets PORT env variable)
-    # or if running in development mode (with 'dev' argument)
-    is_production = os.getenv("PORT") is not None and "dev" not in sys.argv
-
-    if is_production:
-        # Production mode: Run HTTP server + agent in background thread
-        print("🚀 Running in PRODUCTION mode (Render)")
-        print("🌐 Starting HTTP server for health checks...")
-
-        # Run transcription agent in a separate thread
-        agent_thread = threading.Thread(target=run_transcription_agent, daemon=True)
-        agent_thread.start()
-
-        # Run HTTP server in main thread
-        asyncio.run(start_http_server())
-    else:
-        # Development mode: Run agent only (no HTTP server)
-        print("🚀 Running in DEVELOPMENT mode")
-        run_transcription_agent()

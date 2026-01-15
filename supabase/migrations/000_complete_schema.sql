@@ -253,27 +253,25 @@ CREATE INDEX IF NOT EXISTS idx_room_design_chats_generated_by ON public.room_des
 
 -- Function to handle new user creation (updated with proper error handling)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+LANGUAGE plpgsql
+AS $$
 BEGIN
-  -- Insert new user record, or update if conflict occurs
+  -- Insert new user record, ignore if already exists
   INSERT INTO public.users (id, email, created_at)
-  VALUES (NEW.id, NEW.email, NEW.created_at)
-  ON CONFLICT (id) DO UPDATE
-    SET email = EXCLUDED.email,
-        created_at = EXCLUDED.created_at;
-
-  -- Log successful user creation
-  RAISE NOTICE 'User record created/updated for: % (ID: %)', NEW.email, NEW.id;
+  VALUES (NEW.id, NEW.email, COALESCE(NEW.created_at, NOW()))
+  ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
 EXCEPTION
   WHEN OTHERS THEN
-    -- Log error details
-    RAISE WARNING 'Failed to create user record for % (ID: %): %', NEW.email, NEW.id, SQLERRM;
-    -- Re-raise the exception to prevent auth user creation from succeeding
-    RAISE;
+    -- Log but don't block auth signup
+    RAISE WARNING 'Failed to create user record: %', SQLERRM;
+    RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Function to automatically update updated_at timestamp (generic)
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -640,11 +638,11 @@ CREATE POLICY "Users can delete their own votes"
 -- ============ MEETING CHAT MESSAGES POLICIES ============
 CREATE POLICY "Authenticated users can view all meeting messages"
   ON public.meeting_chat_messages FOR SELECT
-  USING (auth.role() = 'authenticated');
+  USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Authenticated users can create meeting messages"
   ON public.meeting_chat_messages FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Users can update their own meeting messages"
   ON public.meeting_chat_messages FOR UPDATE
@@ -774,7 +772,39 @@ BEGIN
   ) THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.final_version_discussions;
   END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+    AND tablename = 'meeting_chat_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.meeting_chat_messages;
+  END IF;
 END $$;
+
+-- =============================================
+-- GRANT TABLE PERMISSIONS
+-- =============================================
+-- Grant permissions to anon and authenticated roles
+-- This is required for Supabase client access even when RLS is configured
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+GRANT ALL ON public.users TO anon, authenticated, service_role;
+GRANT ALL ON public.admins TO anon, authenticated, service_role;
+GRANT ALL ON public.chats TO anon, authenticated, service_role;
+GRANT ALL ON public.messages TO anon, authenticated, service_role;
+GRANT ALL ON public.snapshots TO anon, authenticated, service_role;
+GRANT ALL ON public.final_versions TO anon, authenticated, service_role;
+GRANT ALL ON public.final_version_votes TO anon, authenticated, service_role;
+GRANT ALL ON public.final_version_discussions TO anon, authenticated, service_role;
+GRANT ALL ON public.workflow_states TO anon, authenticated, service_role;
+GRANT ALL ON public.meeting_transcripts TO anon, authenticated, service_role;
+GRANT ALL ON public.transcript_summaries TO anon, authenticated, service_role;
+GRANT ALL ON public.summary_votes TO anon, authenticated, service_role;
+GRANT ALL ON public.meeting_chat_messages TO anon, authenticated, service_role;
+GRANT ALL ON public.prompt_templates TO anon, authenticated, service_role;
+GRANT ALL ON public.room_design_chats TO anon, authenticated, service_role;
 
 -- =============================================
 -- MIGRATION COMPLETE
@@ -792,4 +822,5 @@ END $$;
 -- ✅ Triggers for automatic timestamp updates
 -- ✅ Views for user information
 -- ✅ Realtime subscriptions enabled
+-- ✅ Table permissions granted to anon/authenticated/service_role
 -- =============================================

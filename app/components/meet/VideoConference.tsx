@@ -121,21 +121,25 @@ export default function VideoConference({
             </button>
           </div>
 
-          {/* Panel content */}
-          <div className="flex-1 overflow-hidden">
-            {activePanel === 'transcripts' ? (
-              <div data-transcript-panel style={{ height: '100%' }}>
-                <TranscriptPanel roomName={roomName} />
-              </div>
-            ) : (
-              <div style={{ height: '100%' }}>
-                <DualChatPanel
-                  roomName={roomName}
-                  messages={messages}
-                  setMessages={setMessages}
-                />
-              </div>
-            )}
+          {/* Panel content - both panels stay mounted to preserve state */}
+          <div className="flex-1 overflow-hidden relative">
+            <div
+              data-transcript-panel
+              style={{ height: '100%' }}
+              className={activePanel === 'transcripts' ? 'block' : 'hidden'}
+            >
+              <TranscriptPanel roomName={roomName} />
+            </div>
+            <div
+              style={{ height: '100%' }}
+              className={activePanel === 'chat' ? 'block' : 'hidden'}
+            >
+              <DualChatPanel
+                roomName={roomName}
+                messages={messages}
+                setMessages={setMessages}
+              />
+            </div>
           </div>
         </div>
       </div>

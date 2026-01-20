@@ -42,7 +42,7 @@ export class WorkflowManager {
    * Check if node exists
    */
   static isValidNode(nodeId: string): nodeId is WorkflowNodeId {
-    const validNodes: WorkflowNodeId[] = ['meeting', 'poll', 'coding', 'code-review', 'exit'];
+    const validNodes: WorkflowNodeId[] = ['meeting', 'poll', 'design-review', 'coding', 'code-review', 'exit'];
     return validNodes.includes(nodeId as WorkflowNodeId);
   }
 
@@ -67,7 +67,7 @@ export class WorkflowManager {
       reason?: string;
     }
   > {
-    const nodes: WorkflowNodeId[] = ['meeting', 'poll', 'coding', 'code-review', 'exit'];
+    const nodes: WorkflowNodeId[] = ['meeting', 'poll', 'design-review', 'coding', 'code-review', 'exit'];
 
     const result: any = {};
 

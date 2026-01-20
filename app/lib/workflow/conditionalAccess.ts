@@ -23,13 +23,18 @@ export const ACCESS_RULES: ConditionalAccessRule[] = [
     requiresAll: true,
   },
   {
-    nodeId: 'coding',
+    nodeId: 'design-review',
     requires: ['meeting', 'poll'], // Must have visited both meeting and poll
     requiresAll: true,
   },
   {
+    nodeId: 'coding',
+    requires: ['meeting', 'poll', 'design-review'], // Must have visited meeting, poll, and design-review
+    requiresAll: true,
+  },
+  {
     nodeId: 'code-review',
-    requires: ['meeting', 'poll', 'coding'], // Must have visited meeting, poll, and coding
+    requires: ['meeting', 'poll', 'design-review', 'coding'], // Must have visited all previous stages
     requiresAll: true,
   },
   {
@@ -123,7 +128,7 @@ export function getRecommendedNextNode(
   currentNode: WorkflowNodeId
 ): WorkflowNodeId | null {
   // Define the recommended order
-  const recommendedOrder: WorkflowNodeId[] = ['meeting', 'poll', 'coding', 'code-review', 'exit'];
+  const recommendedOrder: WorkflowNodeId[] = ['meeting', 'poll', 'design-review', 'coding', 'code-review', 'exit'];
 
   // Find the current node index
   const currentIndex = recommendedOrder.indexOf(currentNode);

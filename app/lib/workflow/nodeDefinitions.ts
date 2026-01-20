@@ -23,6 +23,14 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     color: '#8b5cf6', // violet-500
   },
   {
+    id: 'design-review',
+    label: 'Design Review',
+    description: 'Review and edit design implications',
+    route: '/meet/:roomId/design-review',
+    icon: '📝',
+    color: '#f97316', // orange-500
+  },
+  {
     id: 'coding',
     label: 'Coding Mode',
     description: 'Collaborative coding environment',
@@ -56,8 +64,14 @@ export const WORKFLOW_EDGES: WorkflowEdge[] = [
     label: 'Start Poll',
   },
   {
-    id: 'poll-to-coding',
+    id: 'poll-to-design-review',
     source: 'poll',
+    target: 'design-review',
+    label: 'Review Design',
+  },
+  {
+    id: 'design-review-to-coding',
+    source: 'design-review',
     target: 'coding',
     label: 'Begin Coding',
   },
@@ -80,9 +94,14 @@ export const WORKFLOW_EDGES: WorkflowEdge[] = [
     target: 'meeting',
   },
   {
-    id: 'coding-to-poll',
-    source: 'coding',
+    id: 'design-review-to-poll',
+    source: 'design-review',
     target: 'poll',
+  },
+  {
+    id: 'coding-to-design-review',
+    source: 'coding',
+    target: 'design-review',
   },
   {
     id: 'code-review-to-coding',
@@ -98,6 +117,11 @@ export const WORKFLOW_EDGES: WorkflowEdge[] = [
   {
     id: 'poll-to-exit',
     source: 'poll',
+    target: 'exit',
+  },
+  {
+    id: 'design-review-to-exit',
+    source: 'design-review',
     target: 'exit',
   },
   {

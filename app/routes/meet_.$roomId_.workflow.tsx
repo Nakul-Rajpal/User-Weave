@@ -10,8 +10,6 @@ import WorkflowCanvas from '~/components/meet/WorkflowCanvas';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
 import { useAuth } from '~/components/auth/Auth';
 import Auth from '~/components/auth/Auth';
-import { supabase } from '~/lib/supabase/client';
-
 // Note: React Flow CSS is loaded globally in root.tsx to ensure
 // it's available during client-side navigation
 
@@ -22,53 +20,14 @@ export default function WorkflowPage() {
   const { user, loading: authLoading } = useAuth();
   const authReady = !!user && !authLoading;
   const [userId, setUserId] = useState('');
-  const [error, setError] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  const { initializeWorkflow, cleanup } = useWorkflowStore();
+  const { initializeWorkflow, cleanup, error } = useWorkflowStore();
 
-  // Check if current user is global admin
-  const checkAdminStatus = async () => {
-    // Check localStorage first (fast)
-    const localAdminStatus = localStorage.getItem('isAdmin');
-    if (localAdminStatus === 'true') {
-      setIsAdmin(true);
-    }
-
-    // Always verify with server
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const headers: Record<string, string> = {};
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      const response = await fetch('/api/meet/check-admin', { headers });
-      const data = await response.json();
-
-      setIsAdmin(data.isAdmin);
-
-      if (data.isAdmin) {
-        localStorage.setItem('isAdmin', 'true');
-      } else {
-        localStorage.removeItem('isAdmin');
-      }
-    } catch (error) {
-      console.error('Failed to check admin status:', error);
-      setIsAdmin(false);
-      localStorage.removeItem('isAdmin');
-    }
-  };
-
-  // Set userId from authenticated user and check admin status
+  // Set userId from authenticated user
   useEffect(() => {
     if (user?.id) {
       console.log('✅ [WORKFLOW] Using authenticated user:', user.id);
       setUserId(user.id);
-
-      // Check admin status
-      checkAdminStatus();
     }
   }, [user]);
 
@@ -151,7 +110,7 @@ export default function WorkflowPage() {
         </div>
       </div>
     }>
-      {() => <WorkflowCanvas roomId={roomId} isAdmin={isAdmin} />}
+      {() => <WorkflowCanvas roomId={roomId} />}
     </ClientOnly>
   );
 }

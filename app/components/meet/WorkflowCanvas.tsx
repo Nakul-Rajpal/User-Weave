@@ -28,7 +28,6 @@ import HostControlPanel from './HostControlPanel';
 
 interface WorkflowCanvasProps {
   roomId: string;
-  isAdmin: boolean;
 }
 
 // Define node types for ReactFlow
@@ -45,7 +44,7 @@ const NODE_POSITIONS: Record<WorkflowNodeId, { x: number; y: number }> = {
   exit: { x: 1300, y: 200 },
 };
 
-export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps) {
+export default function WorkflowCanvas({ roomId }: WorkflowCanvasProps) {
   const navigate = useNavigate();
   const {
     workflowState,
@@ -55,6 +54,7 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
     isNodeAccessible,
     isNodeVisited,
     isNodeEnabled,
+    isHost, // Use isHost for workflow control (not global isAdmin)
   } = useWorkflowStore();
 
   // Handle node click - navigate to that node's page
@@ -87,8 +87,8 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
         return;
       }
 
-      // Update workflow state (admin only)
-      if (isAdmin) {
+      // Update workflow state (host only - the person who created this room's workflow)
+      if (isHost) {
         navigateToNode(nodeId);
       }
 
@@ -96,7 +96,7 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
       const route = getNodeRoute(nodeId, roomId);
       navigate(route);
     },
-    [roomId, navigate, isAdmin, navigateToNode, isNodeAccessible, isNodeEnabled]
+    [roomId, navigate, isHost, navigateToNode, isNodeAccessible, isNodeEnabled]
   );
 
   // Create ReactFlow nodes from workflow definitions
@@ -185,9 +185,9 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
           <h1 className="text-2xl font-bold text-gray-800">Meeting Workflow</h1>
           <p className="text-sm text-gray-600">
             Room: <span className="font-mono font-semibold">{roomId}</span>
-            {isAdmin && (
+            {isHost && (
               <span className="ml-3 px-2 py-1 bg-orange-500 text-white rounded text-xs font-medium uppercase">
-                ADMIN
+                HOST
               </span>
             )}
           </p>
@@ -227,10 +227,10 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
         </ReactFlow>
       </div>
 
-      {/* Admin Control Panel - Right side */}
-      {isAdmin && (
+      {/* Host Control Panel - Right side (only visible to room host) */}
+      {isHost && (
         <div className="absolute top-20 right-6">
-          <HostControlPanel isAdmin={isAdmin} />
+          <HostControlPanel isAdmin={isHost} />
         </div>
       )}
 
@@ -241,7 +241,7 @@ export default function WorkflowCanvas({ roomId, isAdmin }: WorkflowCanvasProps)
           <li>• Click on accessible nodes to navigate</li>
           <li>• 🔒 Locked nodes require completing previous steps</li>
           <li>• ✓ Visited nodes show your progress</li>
-          {isAdmin && <li>• 🎛️ Use the control panel to enable/disable sections</li>}
+          {isHost && <li>• 🎛️ Use the control panel to enable/disable sections</li>}
         </ul>
       </div>
     </div>

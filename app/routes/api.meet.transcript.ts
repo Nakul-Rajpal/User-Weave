@@ -18,18 +18,40 @@ export async function action({ request }: ActionFunctionArgs) {
     let userId: string | null = null;
 
     if (authHeader) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
-      userId = user?.id || null;
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+
+        if (authError) {
+          console.warn('Auth error getting user:', authError.message);
+        } else {
+          userId = user?.id || null;
+        }
+      } catch (authErr) {
+        console.warn('Failed to get user from token:', authErr);
+      }
     }
 
-    // Save transcript to Supabase
-    const { data, error } = await supabase.from('meeting_transcripts').insert({
+    console.log(`User ID for transcript: ${userId || 'anonymous'}`);
+
+    // Save transcript to Supabase - userId can be null if auth fails
+    const insertData: any = {
       room_id: roomName,
       transcript_data: transcript,
-      created_by_user_id: userId,
-    }).select().single();
+    };
+
+    // Only include user_id if we have a valid one
+    if (userId) {
+      insertData.created_by_user_id = userId;
+    }
+
+    const { data, error } = await supabase
+      .from('meeting_transcripts')
+      .insert(insertData)
+      .select()
+      .single();
 
     if (error) {
       console.error('Error saving transcript:', error);

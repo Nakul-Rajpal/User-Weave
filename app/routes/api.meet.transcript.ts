@@ -1,13 +1,24 @@
 import { type ActionFunctionArgs, json } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client (server-side)
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 export async function action({ request }: ActionFunctionArgs) {
+  // Initialize Supabase client inside the function to ensure env vars are available
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase credentials:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseServiceKey
+    });
+    return json(
+      { success: false, message: 'Server configuration error' },
+      { status: 500 }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
     const { roomName, transcript } = await request.json();
 

@@ -100,7 +100,7 @@ export default function WorkflowCanvas({ roomId }: WorkflowCanvasProps) {
   );
 
   // Create ReactFlow nodes from workflow definitions
-  const reactFlowNodes: Node<WorkflowNodeData>[] = useMemo(() => {
+  const reactFlowNodes: Node[] = useMemo(() => {
     return WORKFLOW_NODES.map((node) => {
       const isEnabled = isNodeEnabled(node.id);
       const isAccessible = isNodeAccessible(node.id);

@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import type { WorkflowNodeId } from '~/types/workflow';
 
 export interface WorkflowNodeData {
@@ -17,9 +17,14 @@ export interface WorkflowNodeData {
   isVisited: boolean;
   isAccessible: boolean;
   onClick: (nodeId: WorkflowNodeId) => void;
+  [key: string]: unknown; // Index signature for @xyflow/react compatibility
 }
 
-function WorkflowNodeComponent({ data }: NodeProps<WorkflowNodeData>) {
+interface WorkflowNodeProps {
+  data: WorkflowNodeData;
+}
+
+function WorkflowNodeComponent({ data }: WorkflowNodeProps) {
   const { id, label, description, icon, color, isCurrent, isVisited, isAccessible, onClick } = data;
 
   const handleClick = () => {

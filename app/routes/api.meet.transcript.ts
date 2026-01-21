@@ -4,8 +4,15 @@ import { getServerEnv } from '~/lib/.server/env.server';
 export async function action({ request }: { request: Request }) {
   console.log('[TRANSCRIPT API] Route hit');
   const env = getServerEnv();
+  console.log('[TRANSCRIPT API] Env check:', {
+    hasServiceKey: !!env.SUPABASE_SERVICE_ROLE_KEY,
+    serviceKeyLength: env.SUPABASE_SERVICE_ROLE_KEY?.length || 0,
+    hasAnonKey: !!env.SUPABASE_ANON_KEY,
+    anonKeyLength: env.SUPABASE_ANON_KEY?.length || 0,
+  });
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+  console.log('[TRANSCRIPT API] Using key type:', env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE' : 'ANON');
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Missing Supabase credentials:', {

@@ -169,8 +169,13 @@ Return ONLY the JSON array, no additional text.`;
     const llmManager = LLMManager.getInstance(serverEnv as any);
     console.log('🔍 DEBUG - LLM Manager instance created');
 
-    await llmManager.updateModelList({ apiKeys, providerSettings, serverEnv: serverEnv as any });
-    console.log('🔍 DEBUG - Model list updated');
+    // Don't pass providerSettings if we have server-side API keys
+    // This prevents cookie-based provider settings from filtering out available providers
+    const hasServerKeys = !!serverEnv?.OPENAI_API_KEY || !!serverEnv?.ANTHROPIC_API_KEY;
+    const effectiveProviderSettings = hasServerKeys ? undefined : providerSettings;
+
+    await llmManager.updateModelList({ apiKeys, providerSettings: effectiveProviderSettings, serverEnv: serverEnv as any });
+    console.log('🔍 DEBUG - Model list updated (hasServerKeys:', hasServerKeys, ')');
 
     const models = llmManager.getModelList();
     debugInfo.totalModelsAvailable = models.length;

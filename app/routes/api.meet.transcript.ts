@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getServerEnv } from '~/lib/.server/env.server';
 
 export async function action({ request }: { request: Request }) {
+  console.log('[TRANSCRIPT API] Route hit');
   const env = getServerEnv();
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;

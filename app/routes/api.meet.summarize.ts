@@ -81,9 +81,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // Merge environment variables from all sources
     // Vercel/Remix provides env through context.env on production
     // process.env is available in Vercel serverless functions
-    const serverEnv = {
+    // Note: process.env doesn't spread correctly, so we explicitly pick needed keys
+    const serverEnv: Record<string, string | undefined> = {
       ...context?.env,      // Vercel production (if available)
-      ...process.env,      // Takes precedence - Vercel runtime env
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      SUPABASE_URL: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     };
 
     const mergedEnvKeys = Object.keys(serverEnv).filter(key =>

@@ -1,7 +1,6 @@
-import { type ActionFunctionArgs, json } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: { request: Request }) {
   // Initialize Supabase client inside the function to ensure env vars are available
   const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -11,7 +10,7 @@ export async function action({ request }: ActionFunctionArgs) {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseServiceKey
     });
-    return json(
+    return Response.json(
       { success: false, message: 'Server configuration error' },
       { status: 500 }
     );
@@ -71,14 +70,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
     console.log(`✅ Transcript saved successfully with ID: ${data.id}`);
 
-    return json({
+    return Response.json({
       success: true,
       message: 'Transcript saved to database',
       transcriptId: data.id,
     });
   } catch (error: any) {
     console.error('Failed to save transcript:', error);
-    return json(
+    return Response.json(
       {
         success: false,
         message: error.message || 'Failed to save transcript',

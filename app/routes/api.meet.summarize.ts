@@ -6,28 +6,28 @@
  * and stores the resulting summary points in the database.
  */
 
-import { type ActionFunctionArgs, json } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 import { generateText } from 'ai';
 import { LLMManager } from '~/lib/modules/llm/manager';
 import { getApiKeysFromCookie, getProviderSettingsFromCookie } from '~/lib/api/cookies';
 import { PROVIDER_LIST } from '~/utils/constants';
-
-// Initialize Supabase client (server-side)
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { getServerEnv } from '~/lib/.server/env.server';
 
 interface AppContext {
   env?: Record<string, string>;
 }
 
-export async function action({ request, context }: ActionFunctionArgs & { context: AppContext }) {
+export async function action({ request, context }: { request: Request; context?: AppContext }) {
+  // Initialize Supabase client
+  const env = getServerEnv();
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   // Collect debug information to return in case of errors
   const debugInfo: any = {
     timestamp: new Date().toISOString(),
-    environment: 'vercel',
+    environment: 'render',
   };
 
   try {
@@ -85,7 +85,7 @@ export async function action({ request, context }: ActionFunctionArgs & { contex
     // Vercel/Remix provides env through context.env on production
     // process.env is available in Vercel serverless functions
     const serverEnv = {
-      ...context.env,      // Vercel production (if available)
+      ...context?.env,      // Vercel production (if available)
       ...process.env,      // Takes precedence - Vercel runtime env
     };
 
@@ -341,23 +341,26 @@ Return ONLY the JSON array, no additional text.`;
 
     console.log(`✅ Summary saved with ID: ${summaryData.id}`);
 
-    return json({
-      success: true,
-      summaryId: summaryData.id,
-      summary: summaryData,
-      pointCount: summaryPoints.length,
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        summaryId: summaryData.id,
+        summary: summaryData,
+        pointCount: summaryPoints.length,
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error: any) {
     console.error('Failed to generate summary:', error);
     console.error('Debug info at error:', JSON.stringify(debugInfo, null, 2));
 
-    return json(
-      {
+    return new Response(
+      JSON.stringify({
         success: false,
         message: error.message || 'Failed to generate summary',
         debug: debugInfo, // Include debug info in error response for client visibility
-      },
-      { status: 500 }
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

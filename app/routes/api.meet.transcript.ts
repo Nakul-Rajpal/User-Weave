@@ -1,18 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
+import { getServerEnv } from '~/lib/.server/env.server';
 
 export async function action({ request }: { request: Request }) {
-  // Initialize Supabase client inside the function to ensure env vars are available
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  const env = getServerEnv();
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Missing Supabase credentials:', {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseServiceKey
     });
-    return Response.json(
-      { success: false, message: 'Server configuration error' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ success: false, message: 'Server configuration error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
@@ -70,19 +71,22 @@ export async function action({ request }: { request: Request }) {
 
     console.log(`✅ Transcript saved successfully with ID: ${data.id}`);
 
-    return Response.json({
-      success: true,
-      message: 'Transcript saved to database',
-      transcriptId: data.id,
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'Transcript saved to database',
+        transcriptId: data.id,
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error: any) {
     console.error('Failed to save transcript:', error);
-    return Response.json(
-      {
+    return new Response(
+      JSON.stringify({
         success: false,
         message: error.message || 'Failed to save transcript',
-      },
-      { status: 500 }
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

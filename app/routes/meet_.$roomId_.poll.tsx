@@ -325,6 +325,7 @@ function ReadOnlySummary({ roomId, isAdmin }: { roomId: string; isAdmin: boolean
   const navigate = useNavigate();
   const [summary, setSummary] = useState<SummaryWithVotes | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
@@ -332,8 +333,86 @@ function ReadOnlySummary({ roomId, isAdmin }: { roomId: string; isAdmin: boolean
   const [editText, setEditText] = useState('');
 
   useEffect(() => {
-    fetchSummary();
+    fetchSummaryAndGenerate();
   }, [roomId]);
+
+  // Generate summary from transcript
+  const generateSummary = async (): Promise<boolean> => {
+    try {
+      setGenerating(true);
+      console.log('🤖 Auto-generating summary for room:', roomId);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch('/api/meet/summarize', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ roomId }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.error('Failed to generate summary:', data.message);
+        if (data.debug) {
+          console.log('Debug info:', data.debug);
+        }
+        return false;
+      }
+
+      console.log('✅ Summary generated:', data.pointCount, 'points');
+      return true;
+    } catch (err: any) {
+      console.error('Error generating summary:', err);
+      return false;
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // Fetch summary and auto-generate if needed
+  const fetchSummaryAndGenerate = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/meet/summary/${roomId}`);
+      const data = await response.json() as { success?: boolean; message?: string; summary?: SummaryWithVotes };
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to fetch summary');
+      }
+
+      // If no summary exists, try to generate one automatically
+      if (!data.summary) {
+        console.log('📝 No summary found, attempting to auto-generate...');
+        const generated = await generateSummary();
+
+        if (generated) {
+          // Fetch the newly generated summary
+          const retryResponse = await fetch(`/api/meet/summary/${roomId}`);
+          const retryData = await retryResponse.json() as { success?: boolean; message?: string; summary?: SummaryWithVotes };
+
+          if (retryData.success && retryData.summary) {
+            setSummary(retryData.summary);
+            return;
+          }
+        }
+      }
+
+      setSummary(data.summary || null);
+    } catch (err: any) {
+      console.error('Failed to fetch summary:', err);
+      setError(err.message || 'Failed to load summary');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchSummary = async () => {
     try {
@@ -468,12 +547,19 @@ function ReadOnlySummary({ roomId, isAdmin }: { roomId: string; isAdmin: boolean
     }
   };
 
-  if (loading) {
+  if (loading || generating) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="text-4xl mb-2">⏳</div>
-          <div className="text-sm text-gray-600">Loading summary...</div>
+          <div className="text-4xl mb-2">{generating ? '🤖' : '⏳'}</div>
+          <div className="text-sm text-gray-600">
+            {generating ? 'Generating AI summary from transcript...' : 'Loading summary...'}
+          </div>
+          {generating && (
+            <p className="text-xs text-gray-500 mt-2">
+              This may take a few moments
+            </p>
+          )}
         </div>
       </div>
     );
@@ -486,7 +572,7 @@ function ReadOnlySummary({ roomId, isAdmin }: { roomId: string; isAdmin: boolean
           <div className="text-4xl mb-2">❌</div>
           <div className="text-sm text-red-600">{error}</div>
           <button
-            onClick={fetchSummary}
+            onClick={fetchSummaryAndGenerate}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
           >
             Retry
@@ -503,8 +589,14 @@ function ReadOnlySummary({ roomId, isAdmin }: { roomId: string; isAdmin: boolean
           <div className="text-4xl mb-2">📝</div>
           <div className="text-sm text-gray-600">No summary available yet</div>
           <p className="text-xs text-gray-500 mt-2">
-            The meeting summary will appear here after it's generated
+            No transcript found for this room. Start a meeting and speak to generate transcripts.
           </p>
+          <button
+            onClick={fetchSummaryAndGenerate}
+            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+          >
+            🔄 Try Again
+          </button>
         </div>
       </div>
     );

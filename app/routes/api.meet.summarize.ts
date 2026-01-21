@@ -6,6 +6,7 @@
  * and stores the resulting summary points in the database.
  */
 
+import { type ActionFunctionArgs } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 import { generateText } from 'ai';
 import { LLMManager } from '~/lib/modules/llm/manager';
@@ -13,11 +14,7 @@ import { getApiKeysFromCookie, getProviderSettingsFromCookie } from '~/lib/api/c
 import { PROVIDER_LIST } from '~/utils/constants';
 import { getServerEnv } from '~/lib/.server/env.server';
 
-interface AppContext {
-  env?: Record<string, string>;
-}
-
-export async function action({ request, context }: { request: Request; context?: AppContext }) {
+export async function action({ request, context }: ActionFunctionArgs) {
   // Initialize Supabase client
   const env = getServerEnv();
   const supabaseUrl = env.SUPABASE_URL;
@@ -215,32 +212,11 @@ Return ONLY the JSON array, no additional text.`;
     // ========== END DEBUG ==========
 
     // Select model based on available API keys
+    // Priority: OpenAI first (for transcription consistency), then Anthropic as fallback
     let preferredModel;
 
-    // Try Claude first if API key exists
-    if (hasAnthropicKey) {
-      console.log('🔍 DEBUG - Attempting to select Anthropic model...');
-      const anthropicModels = models.filter(m => m.provider === 'Anthropic');
-      console.log('🔍 DEBUG - Available Anthropic models:', anthropicModels.map(m => m.name));
-
-      preferredModel = models.find(m =>
-        m.provider === 'Anthropic' && (
-          m.name.includes('claude-3-5-sonnet') ||
-          m.name.includes('claude-3-sonnet')
-        )
-      );
-
-      if (preferredModel) {
-        console.log('✅ Using Claude model (Anthropic API key available):', preferredModel.name);
-      } else {
-        console.log('⚠️  DEBUG - No suitable Claude model found in available models');
-      }
-    } else {
-      console.log('🔍 DEBUG - Skipping Anthropic (no API key)');
-    }
-
-    // Fallback to OpenAI if Claude not found or no key
-    if (!preferredModel && hasOpenAIKey) {
+    // Try OpenAI first if API key exists
+    if (hasOpenAIKey) {
       console.log('🔍 DEBUG - Attempting to select OpenAI model...');
       const openaiModels = models.filter(m => m.provider === 'OpenAI');
       console.log('🔍 DEBUG - Available OpenAI models:', openaiModels.map(m => m.name));
@@ -254,20 +230,42 @@ Return ONLY the JSON array, no additional text.`;
       );
 
       if (preferredModel) {
-        console.log('✅ Using OpenAI model (Claude unavailable, using OpenAI fallback):', preferredModel.name);
+        console.log('✅ Using OpenAI model (OpenAI API key available):', preferredModel.name);
       } else {
         console.log('⚠️  DEBUG - No suitable OpenAI model found in available models');
       }
-    } else if (!preferredModel) {
+    } else {
       console.log('🔍 DEBUG - Skipping OpenAI (no API key)');
+    }
+
+    // Fallback to Anthropic (Claude) if OpenAI not found or no key
+    if (!preferredModel && hasAnthropicKey) {
+      console.log('🔍 DEBUG - Attempting to select Anthropic model...');
+      const anthropicModels = models.filter(m => m.provider === 'Anthropic');
+      console.log('🔍 DEBUG - Available Anthropic models:', anthropicModels.map(m => m.name));
+
+      preferredModel = models.find(m =>
+        m.provider === 'Anthropic' && (
+          m.name.includes('claude-3-5-sonnet') ||
+          m.name.includes('claude-3-sonnet')
+        )
+      );
+
+      if (preferredModel) {
+        console.log('✅ Using Claude model (OpenAI unavailable, using Anthropic fallback):', preferredModel.name);
+      } else {
+        console.log('⚠️  DEBUG - No suitable Claude model found in available models');
+      }
+    } else if (!preferredModel) {
+      console.log('🔍 DEBUG - Skipping Anthropic (no API key)');
     }
 
     if (!preferredModel) {
       console.error('❌ ERROR - No suitable LLM model found!');
       console.error('❌ Available models:', models.length);
-      console.error('❌ Has Anthropic key:', !!hasAnthropicKey);
       console.error('❌ Has OpenAI key:', !!hasOpenAIKey);
-      throw new Error('No suitable LLM model found. Please configure either Anthropic (Claude) or OpenAI (GPT-4) API keys in your settings.');
+      console.error('❌ Has Anthropic key:', !!hasAnthropicKey);
+      throw new Error('No suitable LLM model found. Please configure either OpenAI (GPT-4) or Anthropic (Claude) API keys in your settings.');
     }
 
     const providerInfo = PROVIDER_LIST.find((p) => p.name === preferredModel.provider);

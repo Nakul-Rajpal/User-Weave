@@ -1,7 +1,7 @@
-import { json } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 
 // Catch-all route for Chrome DevTools and other browser extension requests
-export async function loader({ request }: { request: Request }) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
 
   // Handle Chrome DevTools specific paths

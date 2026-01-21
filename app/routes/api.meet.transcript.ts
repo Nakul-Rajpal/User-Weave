@@ -1,7 +1,8 @@
+import { type ActionFunctionArgs } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 import { getServerEnv } from '~/lib/.server/env.server';
 
-export async function action({ request }: { request: Request }) {
+export async function action({ request }: ActionFunctionArgs) {
   console.log('[TRANSCRIPT API] Route hit');
   const env = getServerEnv();
   console.log('[TRANSCRIPT API] Env check:', {

@@ -1,4 +1,4 @@
-import { json } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import JSZip from 'jszip';
 
 // Function to detect if we're running in Cloudflare
@@ -201,7 +201,7 @@ async function fetchRepoContentsZip(repo: string, githubToken?: string) {
   return results.filter(Boolean);
 }
 
-export async function loader({ request, context }: { request: Request; context: any }) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const repo = url.searchParams.get('repo');
 

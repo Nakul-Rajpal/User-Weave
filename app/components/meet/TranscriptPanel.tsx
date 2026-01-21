@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useRoomContext } from '@livekit/components-react';
 import { RoomEvent } from 'livekit-client';
 import { supabase } from '~/lib/supabase/client';
@@ -14,7 +14,12 @@ interface TranscriptEntry {
   participant?: string;
 }
 
-export default function TranscriptPanel({ roomName }: { roomName: string }) {
+export interface TranscriptPanelHandle {
+  saveTranscripts: () => Promise<void>;
+  hasTranscripts: () => boolean;
+}
+
+const TranscriptPanel = forwardRef<TranscriptPanelHandle, { roomName: string }>(({ roomName }, ref) => {
   const room = useRoomContext();
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
   const [currentInterim, setCurrentInterim] = useState('');
@@ -164,6 +169,12 @@ export default function TranscriptPanel({ roomName }: { roomName: string }) {
       console.error('Failed to save transcripts:', error);
     }
   };
+
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    saveTranscripts: saveTranscriptsToServer,
+    hasTranscripts: () => transcripts.length > 0,
+  }));
 
   const downloadTranscripts = () => {
     if (transcripts.length === 0) {
@@ -401,4 +412,8 @@ export default function TranscriptPanel({ roomName }: { roomName: string }) {
       )}
     </div>
   );
-}
+});
+
+TranscriptPanel.displayName = 'TranscriptPanel';
+
+export default TranscriptPanel;

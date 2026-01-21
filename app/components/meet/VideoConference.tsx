@@ -12,8 +12,8 @@ import {
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { useNavigate } from '@remix-run/react';
-import { useState } from 'react';
-import TranscriptPanel from './TranscriptPanel';
+import { useState, useRef } from 'react';
+import TranscriptPanel, { type TranscriptPanelHandle } from './TranscriptPanel';
 import DualChatPanel from './DualChatPanel';
 
 // Unified message type for both text and images
@@ -40,6 +40,18 @@ export default function VideoConference({
   const navigate = useNavigate();
   const [activePanel, setActivePanel] = useState<'transcripts' | 'chat'>('transcripts');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const transcriptPanelRef = useRef<TranscriptPanelHandle>(null);
+
+  // Navigate to workflow, saving transcripts first
+  const handleNavigateToWorkflow = async () => {
+    // Save transcripts before navigating
+    if (transcriptPanelRef.current?.hasTranscripts()) {
+      console.log('📝 Saving transcripts before navigating to workflow...');
+      await transcriptPanelRef.current.saveTranscripts();
+      console.log('✅ Transcripts saved, navigating to workflow');
+    }
+    navigate(`/meet/${roomName}/workflow`);
+  };
 
   const handleLeaveRoom = async () => {
     // Trigger transcript download before leaving if on transcript panel
@@ -83,7 +95,7 @@ export default function VideoConference({
           {/* Control bar with workflow button */}
           <div className="p-4 bg-black flex items-center justify-between">
             <button
-              onClick={() => navigate(`/meet/${roomName}/workflow`)}
+              onClick={handleNavigateToWorkflow}
               className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-medium"
             >
               🔀 Workflow
@@ -128,7 +140,7 @@ export default function VideoConference({
               style={{ height: '100%' }}
               className={activePanel === 'transcripts' ? 'block' : 'hidden'}
             >
-              <TranscriptPanel roomName={roomName} />
+              <TranscriptPanel ref={transcriptPanelRef} roomName={roomName} />
             </div>
             <div
               style={{ height: '100%' }}

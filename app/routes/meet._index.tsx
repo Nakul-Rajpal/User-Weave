@@ -88,7 +88,7 @@ export default function MeetLobby() {
               Please sign in to access video meetings
             </p>
           </div>
-          <Auth />
+          <Auth onSuccess={() => navigate('/meet', { replace: true })} />
         </div>
       </div>
     );

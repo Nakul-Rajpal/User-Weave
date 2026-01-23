@@ -108,8 +108,8 @@ export default function RoomDesignBadge({ metadata, className = '' }: RoomDesign
           </svg>
           <span>
             Your changes won't affect other users' designs. Check{' '}
-            <a href={`/meet/${forkedInfo.roomId}/poll`} className="underline hover:text-purple-800">
-              Poll page
+            <a href={`/meet/${forkedInfo.roomId}/design-implications`} className="underline hover:text-purple-800">
+              Design Implications
             </a>
             {' '}for design history.
           </span>

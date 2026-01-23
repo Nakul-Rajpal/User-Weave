@@ -1,6 +1,6 @@
 /**
- * Code Review Sidebar Component
- * Optimized for narrow sidebar display with voting functionality
+ * Design Rating Sidebar Component
+ * Optimized for narrow sidebar display with upvote/downvote functionality
  * Single-column layout with compact cards
  */
 
@@ -58,10 +58,10 @@ export function CodeReviewSidebar({
     return (
       <div className="flex items-center justify-center h-full px-4">
         <div className="text-center">
-          <div className="text-5xl mb-3">📋</div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">No Final Versions</h3>
+          <div className="text-5xl mb-3">No Designs</div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">No Designs Submitted</h3>
           <p className="text-sm text-gray-600">
-            Final versions will appear here once users mark their work as complete.
+            Designs will appear here once users send their work from the Design stage.
           </p>
         </div>
       </div>
@@ -74,11 +74,11 @@ export function CodeReviewSidebar({
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
           <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <span>📋</span>
-            Final Versions ({finalVersions.length})
+            <span>Designs</span>
+            Submitted Designs ({finalVersions.length})
           </h2>
           <p className="text-xs text-gray-600 mt-1">
-            Review and vote on code submissions
+            Rate and discuss design submissions
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export function CodeReviewSidebar({
                     📅 {new Date(version.selectedAt).toLocaleDateString()}
                   </div>
 
-                  {/* Like/Dislike Vote Buttons */}
+                  {/* Upvote/Downvote Buttons */}
                   <div className="flex gap-2 mb-2">
                     <button
                       onClick={() => handleVoteClick(version.id, 'like')}
@@ -152,10 +152,10 @@ export function CodeReviewSidebar({
                         }
                         disabled:opacity-50 disabled:cursor-not-allowed
                       `}
-                      title="Like this version"
+                      title="Upvote this design"
                     >
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-base">👍</span>
+                        <span className="text-base">Upvote</span>
                         <span>{voteData.like > 0 ? voteData.like : ''}</span>
                       </div>
                     </button>
@@ -172,10 +172,10 @@ export function CodeReviewSidebar({
                         }
                         disabled:opacity-50 disabled:cursor-not-allowed
                       `}
-                      title="Dislike this version"
+                      title="Downvote this design"
                     >
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-base">👎</span>
+                        <span className="text-base">Downvote</span>
                         <span>{voteData.dislike > 0 ? voteData.dislike : ''}</span>
                       </div>
                     </button>
@@ -183,7 +183,7 @@ export function CodeReviewSidebar({
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
-                    {/* View Code Button */}
+                    {/* View Design Button */}
                     <button
                       onClick={() => onViewCode(version)}
                       className={`
@@ -195,7 +195,7 @@ export function CodeReviewSidebar({
                         }
                       `}
                     >
-                      {isSelected ? '👁️ Viewing' : '👁️ View Code'}
+                      {isSelected ? 'Viewing' : 'View Design'}
                     </button>
 
                     {/* Discussion Button */}

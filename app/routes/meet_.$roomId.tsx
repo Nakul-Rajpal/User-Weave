@@ -83,7 +83,7 @@ export default function MeetingRoom() {
               Please sign in to join the meeting room
             </p>
           </div>
-          <Auth />
+          <Auth onSuccess={() => navigate(`/meet/${roomName}`, { replace: true })} />
         </div>
       </div>
     );

@@ -38,10 +38,10 @@ const nodeTypes = {
 // Node positions for layout (can be adjusted)
 const NODE_POSITIONS: Record<WorkflowNodeId, { x: number; y: number }> = {
   meeting: { x: 100, y: 200 },
-  poll: { x: 350, y: 200 },
-  'design-review': { x: 600, y: 200 },
-  coding: { x: 850, y: 200 },
-  'code-review': { x: 1100, y: 200 },
+  'design-implications': { x: 350, y: 200 },
+  design: { x: 600, y: 200 },
+  rating: { x: 850, y: 200 },
+  winner: { x: 1100, y: 200 },
   exit: { x: 1350, y: 200 },
 };
 

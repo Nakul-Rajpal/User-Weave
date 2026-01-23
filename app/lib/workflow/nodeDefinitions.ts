@@ -15,36 +15,36 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     color: '#3b82f6', // blue-500
   },
   {
-    id: 'poll',
-    label: 'Poll/Voting',
-    description: 'Conduct polls and voting sessions',
-    route: '/meet/:roomId/poll',
-    icon: '📊',
+    id: 'design-implications',
+    label: 'Design Implications',
+    description: 'AI-generated design implications from transcript',
+    route: '/meet/:roomId/design-implications',
+    icon: '💡',
     color: '#8b5cf6', // violet-500
   },
   {
-    id: 'design-review',
-    label: 'Design Review',
-    description: 'Review and edit design implications',
-    route: '/meet/:roomId/design-review',
-    icon: '📝',
-    color: '#f97316', // orange-500
-  },
-  {
-    id: 'coding',
-    label: 'Coding Mode',
-    description: 'Collaborative coding environment',
-    route: '/meet/:roomId/code',
-    icon: '💻',
+    id: 'design',
+    label: 'Design Stage',
+    description: 'Individual design work with LLM assistance',
+    route: '/meet/:roomId/design',
+    icon: '🎨',
     color: '#10b981', // green-500
   },
   {
-    id: 'code-review',
-    label: 'Code Review',
-    description: 'Review and discuss code changes',
-    route: '/meet/:roomId/code-review',
-    icon: '🔍',
+    id: 'rating',
+    label: 'Rating',
+    description: 'Rate and discuss submitted designs',
+    route: '/meet/:roomId/rating',
+    icon: '⭐',
     color: '#f59e0b', // amber-500
+  },
+  {
+    id: 'winner',
+    label: 'Final Design',
+    description: 'Group-selected final design',
+    route: '/meet/:roomId/winner',
+    icon: '✅',
+    color: '#ec4899', // pink-500
   },
   {
     id: 'exit',
@@ -58,55 +58,55 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
 
 export const WORKFLOW_EDGES: WorkflowEdge[] = [
   {
-    id: 'meeting-to-poll',
+    id: 'meeting-to-design-implications',
     source: 'meeting',
-    target: 'poll',
-    label: 'Start Poll',
+    target: 'design-implications',
+    label: 'View Implications',
   },
   {
-    id: 'poll-to-design-review',
-    source: 'poll',
-    target: 'design-review',
-    label: 'Review Design',
+    id: 'design-implications-to-design',
+    source: 'design-implications',
+    target: 'design',
+    label: 'Start Design',
   },
   {
-    id: 'design-review-to-coding',
-    source: 'design-review',
-    target: 'coding',
-    label: 'Begin Coding',
+    id: 'design-to-rating',
+    source: 'design',
+    target: 'rating',
+    label: 'Submit & Rate',
   },
   {
-    id: 'coding-to-code-review',
-    source: 'coding',
-    target: 'code-review',
-    label: 'Review Code',
+    id: 'rating-to-winner',
+    source: 'rating',
+    target: 'winner',
+    label: 'View Final',
   },
   {
-    id: 'code-review-to-exit',
-    source: 'code-review',
+    id: 'winner-to-exit',
+    source: 'winner',
     target: 'exit',
     label: 'Complete',
   },
   // Allow going back to previous stages
   {
-    id: 'poll-to-meeting',
-    source: 'poll',
+    id: 'design-implications-to-meeting',
+    source: 'design-implications',
     target: 'meeting',
   },
   {
-    id: 'design-review-to-poll',
-    source: 'design-review',
-    target: 'poll',
+    id: 'design-to-design-implications',
+    source: 'design',
+    target: 'design-implications',
   },
   {
-    id: 'coding-to-design-review',
-    source: 'coding',
-    target: 'design-review',
+    id: 'rating-to-design',
+    source: 'rating',
+    target: 'design',
   },
   {
-    id: 'code-review-to-coding',
-    source: 'code-review',
-    target: 'coding',
+    id: 'winner-to-rating',
+    source: 'winner',
+    target: 'rating',
   },
   // Exit can be accessed from any node
   {
@@ -115,18 +115,18 @@ export const WORKFLOW_EDGES: WorkflowEdge[] = [
     target: 'exit',
   },
   {
-    id: 'poll-to-exit',
-    source: 'poll',
+    id: 'design-implications-to-exit',
+    source: 'design-implications',
     target: 'exit',
   },
   {
-    id: 'design-review-to-exit',
-    source: 'design-review',
+    id: 'design-to-exit',
+    source: 'design',
     target: 'exit',
   },
   {
-    id: 'coding-to-exit',
-    source: 'coding',
+    id: 'rating-to-exit',
+    source: 'rating',
     target: 'exit',
   },
 ];

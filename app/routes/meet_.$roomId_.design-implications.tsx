@@ -1,6 +1,7 @@
 /**
- * Discussion Points Page (formerly Poll Page)
- * Shows discussion points with admin controls
+ * Design Implications Page
+ * AI-generated design implications from meeting transcript
+ * All participants can edit, add, or remove design points
  */
 
 import { useEffect, useState } from 'react';
@@ -10,12 +11,11 @@ import { useAuth } from '~/components/auth/Auth';
 import Auth from '~/components/auth/Auth';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
 import RouteGuard from '~/components/meet/RouteGuard';
-import TranscriptSummaryPanel from '~/components/meet/TranscriptSummaryPanel';
+import DesignImplicationsPanel from '~/components/meet/DesignImplicationsPanel';
 import VideoTileStrip from '~/components/meet/VideoTileStrip';
 import { MeetingAuthProvider } from '~/components/meet/MeetingAuthProvider';
-import { supabase } from '~/lib/supabase/client';
 
-export default function SummaryDiscussionPage() {
+export default function DesignImplicationsPage() {
   const params = useParams();
   const navigate = useNavigate();
   const roomId = params.roomId as string;
@@ -24,61 +24,22 @@ export default function SummaryDiscussionPage() {
   const [userId, setUserId] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
-  // Removed activeTab state - only showing discussion points now
   const [token, setToken] = useState('');
   const [serverUrl, setServerUrl] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  const { initializeWorkflow, cleanup } = useWorkflowStore();
-
-  // Check if current user is global admin
-  const checkAdminStatus = async () => {
-    // Check localStorage first (fast)
-    const localAdminStatus = localStorage.getItem('isAdmin');
-    if (localAdminStatus === 'true') {
-      setIsAdmin(true);
-    }
-
-    // Always verify with server
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const headers: Record<string, string> = {};
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      const response = await fetch('/api/meet/check-admin', { headers });
-      const data = await response.json();
-
-      setIsAdmin(data.isAdmin);
-
-      if (data.isAdmin) {
-        localStorage.setItem('isAdmin', 'true');
-      } else {
-        localStorage.removeItem('isAdmin');
-      }
-    } catch (error) {
-      console.error('Failed to check admin status:', error);
-      setIsAdmin(false);
-      localStorage.removeItem('isAdmin');
-    }
-  };
+  const { initializeWorkflow, cleanup, isHost, navigateToNode } = useWorkflowStore();
 
   // Set username from authenticated user
   useEffect(() => {
     if (user?.email) {
       const displayName = user.email.split('@')[0];
-      console.log('✅ [SUMMARY] Using authenticated user:', {
+      console.log('[DESIGN-IMPLICATIONS] Using authenticated user:', {
         userId: user.id,
         email: user.email,
         displayName,
       });
       setUserId(user.id);
       setUsername(displayName);
-
-      // Check admin status
-      checkAdminStatus();
     }
   }, [user]);
 
@@ -92,7 +53,7 @@ export default function SummaryDiscussionPage() {
               Login Required
             </h1>
             <p className="text-bolt-elements-textSecondary">
-              Please sign in to access the summary discussion page
+              Please sign in to access the design implications page
             </p>
           </div>
           <Auth />
@@ -100,27 +61,6 @@ export default function SummaryDiscussionPage() {
       </div>
     );
   }
-
-  // Old auth initialization code - replaced with useAuth()
-  // useEffect(() => {
-  //   console.log('🔐 [POLL] Initializing meeting authentication...');
-  //   initializeMeetingAuth()
-  //     .then(({ uuid, username, session }) => {
-  //       console.log('✅ [POLL] Auth initialized:', {
-  //         uuid,
-  //         username,
-  //         sessionUserId: session.user.id,
-  //       });
-  //       setUserId(session.user.id);
-  //       setUsername(username);
-  //       setAuthReady(true);
-  //     })
-  //     .catch((error) => {
-  //       console.error('❌ [POLL] Auth initialization failed:', error);
-  //       setError('Failed to initialize authentication. Please refresh the page.');
-  //       setAuthReady(false);
-  //     });
-  // }, []);
 
   // Initialize workflow after auth is ready
   useEffect(() => {
@@ -130,51 +70,51 @@ export default function SummaryDiscussionPage() {
     }
 
     if (!authReady || !userId) {
-      console.log('⏳ [POLL] Waiting for auth...', { authReady, hasUserId: !!userId });
+      console.log('[DESIGN-IMPLICATIONS] Waiting for auth...', { authReady, hasUserId: !!userId });
       return;
     }
 
-    console.log('🔄 [POLL] Initializing workflow state...');
+    console.log('[DESIGN-IMPLICATIONS] Initializing workflow state...');
     initializeWorkflow(roomId, userId);
 
     // Cleanup on unmount
     return () => {
-      console.log('🧹 [POLL] Cleaning up workflow state...');
+      console.log('[DESIGN-IMPLICATIONS] Cleaning up workflow state...');
       cleanup();
     };
   }, [roomId, userId, authReady, initializeWorkflow, cleanup, navigate]);
 
   // Fetch LiveKit token after auth is ready
   useEffect(() => {
-    console.log('🔑 [POLL] Token fetch effect triggered:', { roomId, authReady, username });
+    console.log('[DESIGN-IMPLICATIONS] Token fetch effect triggered:', { roomId, authReady, username });
 
     if (!roomId) {
-      console.log('❌ [POLL] No room ID');
+      console.log('[DESIGN-IMPLICATIONS] No room ID');
       return;
     }
 
     // Don't fetch token until auth is ready
     if (!authReady || !username) {
-      console.log('⏳ [POLL] Waiting for auth...', { authReady, hasUsername: !!username });
+      console.log('[DESIGN-IMPLICATIONS] Waiting for auth...', { authReady, hasUsername: !!username });
       return;
     }
 
     const fetchToken = async () => {
       try {
-        console.log('📡 [POLL] Fetching LiveKit token for:', { roomId, username });
+        console.log('[DESIGN-IMPLICATIONS] Fetching LiveKit token for:', { roomId, username });
 
         const resp = await fetch(
           `/api/meet/token?room=${roomId}&username=${username}`
         );
 
-        console.log('📥 [POLL] Token response status:', resp.status);
+        console.log('[DESIGN-IMPLICATIONS] Token response status:', resp.status);
 
         if (!resp.ok) {
           throw new Error('Failed to get token');
         }
 
         const data = await resp.json() as { token?: string; url?: string; error?: string };
-        console.log('📦 [POLL] Token data received:', { hasToken: !!data.token, hasUrl: !!data.url, error: data.error });
+        console.log('[DESIGN-IMPLICATIONS] Token data received:', { hasToken: !!data.token, hasUrl: !!data.url, error: data.error });
 
         if (data.error) {
           throw new Error(data.error);
@@ -182,9 +122,9 @@ export default function SummaryDiscussionPage() {
 
         setToken(data.token || '');
         setServerUrl(data.url || '');
-        console.log('✅ [POLL] Token and server URL set successfully');
+        console.log('[DESIGN-IMPLICATIONS] Token and server URL set successfully');
       } catch (e) {
-        console.error('❌ [POLL] Token fetch error:', e);
+        console.error('[DESIGN-IMPLICATIONS] Token fetch error:', e);
         setError(e instanceof Error ? e.message : 'Failed to connect to video');
       }
     };
@@ -192,16 +132,27 @@ export default function SummaryDiscussionPage() {
     fetchToken();
   }, [roomId, authReady, username]);
 
-  // Navigate to workflow
-  const handleNavigateToWorkflow = () => {
-    navigate(`/meet/${roomId}/workflow`);
+  // Navigate back to meeting
+  const handleBackToMeeting = () => {
+    if (isHost) {
+      navigateToNode('meeting');
+    }
+    navigate(`/meet/${roomId}`);
+  };
+
+  // Navigate to design stage
+  const handleContinueToDesign = () => {
+    if (isHost) {
+      navigateToNode('design');
+    }
+    navigate(`/meet/${roomId}/design`);
   };
 
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-red-50">
         <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
+          <div className="text-4xl mb-4">Error</div>
           <div className="text-xl font-semibold text-red-700 mb-2">Error</div>
           <div className="text-sm text-red-600">{error}</div>
         </div>
@@ -213,7 +164,7 @@ export default function SummaryDiscussionPage() {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-4xl mb-4">Loading...</div>
           <div className="text-xl font-semibold text-gray-700">
             {!authReady && 'Authenticating...'}
             {authReady && !username && 'Loading identity...'}
@@ -228,7 +179,7 @@ export default function SummaryDiscussionPage() {
   return (
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
-        <RouteGuard nodeId="poll" roomId={roomId}>
+        <RouteGuard nodeId="design-implications" roomId={roomId}>
           <div className="h-screen flex flex-col">
             <VideoTileStrip
               token={token}
@@ -236,41 +187,63 @@ export default function SummaryDiscussionPage() {
               roomName={roomId}
             >
               <MeetingAuthProvider>
-                <div className="flex flex-col bg-gradient-to-br from-purple-50 to-blue-50" style={{ height: 'calc(100vh - 8rem)' }}>
+                <div className="flex flex-col bg-gradient-to-br from-violet-50 to-purple-50" style={{ height: 'calc(100vh - 8rem)' }}>
                   {/* Header */}
                   <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
                     <div>
                       <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="text-3xl">📋</span>
-                        Summary Discussion
-                        {isAdmin && (
-                          <span className="ml-2 px-2 py-0.5 text-xs bg-orange-500 text-white rounded uppercase">
-                            ADMIN
-                          </span>
-                        )}
+                        <span className="text-3xl">💡</span>
+                        Design Implications
                       </h1>
                       <p className="text-sm text-gray-600">
                         Room: <span className="font-mono font-semibold">{roomId}</span> | User:{' '}
                         <span className="font-semibold">{username}</span>
                       </p>
                     </div>
+                    <div className="text-sm text-gray-500">
+                      AI-generated implications from your meeting transcript
+                    </div>
                   </div>
 
-                  {/* Main Content - Discussion Points Only */}
+                  {/* Instructions Banner */}
+                  <div className="bg-violet-100 border-b border-violet-200 px-6 py-3">
+                    <p className="text-sm text-violet-800">
+                      <strong>All participants</strong> can edit, add, or remove design implications below.
+                      Once everyone is satisfied, proceed to the design stage.
+                    </p>
+                  </div>
+
+                  {/* Main Content - Design Implications Panel with Edit Access for Everyone */}
                   <div className="flex-1 overflow-auto">
                     <ClientOnly fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
                       {() => (
-                        <TranscriptSummaryPanel roomId={roomId} readOnly={!isAdmin} />
+                        <DesignImplicationsPanel roomId={roomId} readOnly={false} />
                       )}
                     </ClientOnly>
                   </div>
 
-                  {/* Footer Instructions */}
+                  {/* Navigation Footer */}
                   <div className="bg-white border-t border-gray-200 px-6 py-4">
-                    <p className="text-sm text-gray-600 text-center">
-                      Use the <span className="font-semibold">Workflow</span> button in the video bar to navigate between
-                      different meeting stages
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={handleBackToMeeting}
+                        className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center gap-2"
+                      >
+                        <span>Back to Meeting</span>
+                      </button>
+
+                      <p className="text-sm text-gray-500">
+                        Use the <span className="font-semibold">Workflow</span> button in the video bar for full navigation
+                      </p>
+
+                      <button
+                        onClick={handleContinueToDesign}
+                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-colors font-medium flex items-center gap-2 shadow-md hover:shadow-lg"
+                      >
+                        <span>Continue to Design</span>
+                        <span>-&gt;</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </MeetingAuthProvider>
@@ -281,4 +254,3 @@ export default function SummaryDiscussionPage() {
     </ClientOnly>
   );
 }
-

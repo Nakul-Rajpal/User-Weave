@@ -129,31 +129,32 @@ export async function action({ request, context }: ActionFunctionArgs) {
       })
       .join('\n');
 
-    // Create summarization prompt
-    const prompt = `You are an AI assistant helping to summarize a meeting transcript.
+    // Create design implications prompt
+    const prompt = `You are an AI assistant helping to extract design implications from a meeting transcript.
 
-Analyze the following meeting transcript and generate a structured summary with bullet points.
+Analyze the following meeting transcript and generate structured design implications that will guide the implementation of a web application or digital product.
 
 Categorize each point as one of:
-- "decision": A decision that was made
-- "action": An action item or task to be done
-- "discussion": A topic that was discussed
-- "question": A question that was raised
+- "decision": A design decision that was made (architecture, technology choices, UI patterns)
+- "action": A design task or implementation item to be done
+- "discussion": A design consideration or trade-off that was discussed
+- "question": An open design question that needs resolution
 
-Return the summary as a JSON array of objects with this structure:
+Return the design implications as a JSON array of objects with this structure:
 [
   {
     "id": "unique-id-1",
-    "text": "Brief summary of the point",
+    "text": "Brief description of the design implication",
     "category": "decision"
   },
   ...
 ]
 
 Important:
+- Focus on design-relevant information (architecture, UI/UX, features, technical decisions)
 - Use simple sequential IDs like "point-1", "point-2", etc.
 - Keep each point concise (1-2 sentences max)
-- Focus on actionable and important information
+- Focus on actionable design implications that will guide implementation
 - Limit to 10-15 key points total
 
 Meeting Transcript:

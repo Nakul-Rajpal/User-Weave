@@ -82,7 +82,7 @@ export function useAuth() {
   };
 }
 
-export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function AuthModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess?: () => void }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -97,8 +97,14 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
       if (isSignUp) {
         await signUp(email, password);
       } else {
-        await signIn(email, password);
-        onClose();
+        const result = await signIn(email, password);
+        if (result.data && !result.error) {
+          onClose();
+          // Force a small delay to let authStore update, then trigger onSuccess
+          setTimeout(() => {
+            onSuccess?.();
+          }, 100);
+        }
       }
     } finally {
       setLoading(false);
@@ -171,6 +177,16 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 }
 
 // Default export for convenience - auto-opens the modal
-export default function Auth() {
-  return <AuthModal isOpen={true} onClose={() => {}} />;
+export default function Auth({ onSuccess }: { onSuccess?: () => void } = {}) {
+  const handleSuccess = () => {
+    // Force a page reload to ensure proper re-render after auth state change
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      // Default behavior: reload the page to pick up new auth state
+      window.location.reload();
+    }
+  };
+
+  return <AuthModal isOpen={true} onClose={() => {}} onSuccess={handleSuccess} />;
 }

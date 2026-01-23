@@ -1,7 +1,7 @@
 /**
- * Code Review Page
- * Displays all users' final versions with video tiles
- * Allows users to vote on final versions (Approve/Request Changes/Comment)
+ * Rating Page
+ * Displays all users' submitted designs with voting functionality
+ * Allows users to upvote/downvote designs and leave comments
  */
 
 import { useEffect, useState } from 'react';
@@ -27,7 +27,7 @@ import { Workbench } from '~/components/workbench/Workbench.client';
 // Loader required for Workbench component (uses useLoaderData internally)
 export const loader = () => json({});
 
-export default function CodeReviewPage() {
+export default function RatingPage() {
   const params = useParams();
   const navigate = useNavigate();
   const roomId = params.roomId as string;
@@ -54,13 +54,13 @@ export default function CodeReviewPage() {
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading workspace...');
 
-  const { initializeWorkflow, cleanup } = useWorkflowStore();
+  const { initializeWorkflow, cleanup, isHost, navigateToNode } = useWorkflowStore();
 
   // Set username and userId from authenticated user
   useEffect(() => {
     if (user?.email) {
       const displayName = user.email.split('@')[0];
-      console.log('✅ [CODE-REVIEW] Using authenticated user:', {
+      console.log('[RATING] Using authenticated user:', {
         userId: user.id,
         email: user.email,
         displayName,
@@ -80,7 +80,7 @@ export default function CodeReviewPage() {
               Login Required
             </h1>
             <p className="text-bolt-elements-textSecondary">
-              Please sign in to access code review
+              Please sign in to access design rating
             </p>
           </div>
           <Auth />
@@ -88,27 +88,6 @@ export default function CodeReviewPage() {
       </div>
     );
   }
-
-  // Old auth initialization - replaced with useAuth()
-  // useEffect(() => {
-  //   console.log('🔐 [CODE-REVIEW] Initializing meeting authentication...');
-  //   initializeMeetingAuth()
-  //     .then(({ uuid, username, session }) => {
-  //       console.log('✅ [CODE-REVIEW] Auth initialized:', {
-  //         uuid,
-  //         username,
-  //         sessionUserId: session.user.id,
-  //       });
-  //       setUserId(session.user.id);
-  //       setUsername(username);
-  //       setAuthReady(true);
-  //     })
-  //     .catch((error) => {
-  //       console.error('❌ [CODE-REVIEW] Auth initialization failed:', error);
-  //       setError('Failed to initialize authentication. Please refresh the page.');
-  //       setAuthReady(false);
-  //     });
-  // }, []);
 
   // Initialize workflow after auth is ready
   useEffect(() => {
@@ -118,23 +97,23 @@ export default function CodeReviewPage() {
     }
 
     if (!authReady || !userId) {
-      console.log('⏳ [CODE-REVIEW] Waiting for auth...', { authReady, hasUserId: !!userId });
+      console.log('[RATING] Waiting for auth...', { authReady, hasUserId: !!userId });
       return;
     }
 
-    console.log('🔄 [CODE-REVIEW] Initializing workflow state...');
+    console.log('[RATING] Initializing workflow state...');
     initializeWorkflow(roomId, userId);
 
     // Cleanup on unmount
     return () => {
-      console.log('🧹 [CODE-REVIEW] Cleaning up workflow state...');
+      console.log('[RATING] Cleaning up workflow state...');
       cleanup();
     };
   }, [roomId, userId, authReady, initializeWorkflow, cleanup, navigate]);
 
   // Fetch LiveKit token after auth is ready
   useEffect(() => {
-    console.log('🔑 [CODE-REVIEW] Token fetch effect triggered:', { roomId, authReady, username });
+    console.log('[RATING] Token fetch effect triggered:', { roomId, authReady, username });
 
     if (!roomId || !authReady || !username) {
       return;
@@ -142,7 +121,7 @@ export default function CodeReviewPage() {
 
     const fetchToken = async () => {
       try {
-        console.log('📡 [CODE-REVIEW] Fetching LiveKit token...');
+        console.log('[RATING] Fetching LiveKit token...');
 
         const resp = await fetch(`/api/meet/token?room=${roomId}&username=${username}`);
 
@@ -158,9 +137,9 @@ export default function CodeReviewPage() {
 
         setToken(data.token || '');
         setServerUrl(data.url || '');
-        console.log('✅ [CODE-REVIEW] Token and server URL set successfully');
+        console.log('[RATING] Token and server URL set successfully');
       } catch (e) {
-        console.error('❌ [CODE-REVIEW] Token fetch error:', e);
+        console.error('[RATING] Token fetch error:', e);
         setError(e instanceof Error ? e.message : 'Failed to connect to video');
       }
     };
@@ -171,30 +150,30 @@ export default function CodeReviewPage() {
   // Fetch final versions
   useEffect(() => {
     if (!authReady || !userId) {
-      console.log('⏳ [CODE-REVIEW] Waiting for auth...', { authReady, hasUserId: !!userId });
+      console.log('[RATING] Waiting for auth...', { authReady, hasUserId: !!userId });
       return;
     }
 
     const loadFinalVersions = async () => {
       try {
         setLoading(true);
-        console.log('📦 [CODE-REVIEW] Fetching final versions...');
+        console.log('[RATING] Fetching submitted designs...');
 
         // Verify session exists before fetching
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          console.error('❌ [CODE-REVIEW] No session found, cannot fetch versions');
+          console.error('[RATING] No session found, cannot fetch versions');
           toast.error('Authentication session not found. Please refresh the page.');
           return;
         }
 
-        console.log('✅ [CODE-REVIEW] Session verified, fetching versions...');
+        console.log('[RATING] Session verified, fetching designs...');
         const versions = await getAllFinalVersions();
         setFinalVersions(versions);
-        console.log(`✅ [CODE-REVIEW] Loaded ${versions.length} final versions`);
+        console.log(`[RATING] Loaded ${versions.length} submitted designs`);
       } catch (err: any) {
-        console.error('❌ [CODE-REVIEW] Error loading final versions:', err);
-        toast.error(`Failed to load final versions: ${err.message || 'Unknown error'}`);
+        console.error('[RATING] Error loading submitted designs:', err);
+        toast.error(`Failed to load submitted designs: ${err.message || 'Unknown error'}`);
       } finally {
         setLoading(false);
       }
@@ -215,19 +194,19 @@ export default function CodeReviewPage() {
   const loadVotes = async () => {
     try {
       setLoadingVotes(true);
-      console.log('🗳️ [CODE-REVIEW] Fetching votes for room:', roomId, 'userId:', userId);
+      console.log('[RATING] Fetching votes for room:', roomId, 'userId:', userId);
 
       const response = await fetch(`/api/meet/final-version-votes/${roomId}?userId=${userId}`);
       const data = await response.json();
 
       if (data.success) {
         setVotes(data.votes || {});
-        console.log('✅ [CODE-REVIEW] Votes loaded successfully');
+        console.log('[RATING] Votes loaded successfully');
       } else {
-        console.error('❌ [CODE-REVIEW] Failed to fetch votes:', data.error);
+        console.error('[RATING] Failed to fetch votes:', data.error);
       }
     } catch (err) {
-      console.error('❌ [CODE-REVIEW] Error fetching votes:', err);
+      console.error('[RATING] Error fetching votes:', err);
     } finally {
       setLoadingVotes(false);
     }
@@ -239,10 +218,10 @@ export default function CodeReviewPage() {
       return;
     }
 
-    console.log('👂 [CODE-REVIEW] Setting up real-time vote updates...');
+    console.log('[RATING] Setting up real-time vote updates...');
 
     const channel = supabase
-      .channel(`code-review:${roomId}`)
+      .channel(`rating:${roomId}`)
       .on(
         'postgres_changes',
         {
@@ -252,14 +231,14 @@ export default function CodeReviewPage() {
           filter: `room_id=eq.${roomId}`,
         },
         (payload) => {
-          console.log('🔄 [CODE-REVIEW] Vote changed, reloading votes...', payload);
+          console.log('[RATING] Vote changed, reloading votes...', payload);
           loadVotes();
         }
       )
       .subscribe();
 
     return () => {
-      console.log('🛑 [CODE-REVIEW] Cleaning up real-time subscriptions');
+      console.log('[RATING] Cleaning up real-time subscriptions');
       supabase.removeChannel(channel);
     };
   }, [roomId]);
@@ -267,7 +246,7 @@ export default function CodeReviewPage() {
   // Handle vote submission
   const handleVote = async (versionId: string, vote: FinalVersionVoteType, comment?: string) => {
     try {
-      console.log('🗳️ [CODE-REVIEW] Submitting vote:', { versionId, vote, hasComment: !!comment, userId });
+      console.log('[RATING] Submitting vote:', { versionId, vote, hasComment: !!comment, userId });
 
       const response = await fetch('/api/meet/final-version-vote', {
         method: 'POST',
@@ -289,78 +268,65 @@ export default function CodeReviewPage() {
         throw new Error(data.error || 'Failed to vote');
       }
 
-      console.log('✅ [CODE-REVIEW] Vote submitted successfully');
+      console.log('[RATING] Vote submitted successfully');
       toast.success('Vote recorded successfully!');
 
       // Update local votes state
       await loadVotes();
     } catch (err: any) {
-      console.error('❌ [CODE-REVIEW] Error voting:', err);
+      console.error('[RATING] Error voting:', err);
       toast.error(err.message || 'Failed to submit vote');
     }
   };
 
   // Handle viewing code in workbench
   const handleViewCode = async (version: FinalVersionWithDetails) => {
-    console.log('🔍 [DEBUG-VIEW] ========== VIEW CODE CLICKED ==========');
-    console.log('🔍 [DEBUG-VIEW] Version ID:', version.id);
-    console.log('🔍 [DEBUG-VIEW] Version User:', version.userName);
-    console.log('🔍 [DEBUG-VIEW] Previously selected version:', selectedVersion?.id);
-    console.log('🔍 [DEBUG-VIEW] Current workbench visible:', workbenchStore.showWorkbench.get());
-    console.log('🔍 [DEBUG-VIEW] Current workbench files count:', Object.keys(workbenchStore.files.get()).length);
+    console.log('[RATING] View code clicked for version:', version.id);
 
     setSelectedVersion(version);
     setLoadingFiles(true);
     setLoadingMessage('Loading workspace...');
 
     try {
-      console.log('🔍 [CODE-REVIEW] Loading files for version:', version.id);
+      console.log('[RATING] Loading files for version:', version.id);
 
       // Check if files exist
       if (!version.files || Object.keys(version.files).length === 0) {
-        console.warn('⚠️ [CODE-REVIEW] No files found in version snapshot');
-        console.log('🔍 [DEBUG-VIEW] No files to load, aborting');
-        toast.warning('This version has no files to display');
+        console.warn('[RATING] No files found in version snapshot');
+        toast.warning('This design has no files to display');
         setSelectedVersion(null);
         return;
       }
 
-      console.log('📁 [CODE-REVIEW] Found', Object.keys(version.files).length, 'files/folders');
-      console.log('🔍 [DEBUG-VIEW] File keys:', Object.keys(version.files).slice(0, 10));
+      console.log('[RATING] Found', Object.keys(version.files).length, 'files/folders');
 
       // loadFinalVersionFiles handles showing/hiding the workbench
-      console.log('🔍 [DEBUG-VIEW] Calling loadFinalVersionFiles...');
       await loadFinalVersionFiles(version.files, (message: string) => {
-        console.log('📦 [CODE-REVIEW] Progress:', message);
-        console.log('🔍 [DEBUG-VIEW] Progress update:', message);
+        console.log('[RATING] Progress:', message);
         setLoadingMessage(message);
       });
 
-      console.log('✅ [CODE-REVIEW] Files loaded successfully');
-      console.log('🔍 [DEBUG-VIEW] loadFinalVersionFiles completed successfully');
-      console.log('🔍 [DEBUG-VIEW] Final workbench state:', {
-        visible: workbenchStore.showWorkbench.get(),
-        filesCount: Object.keys(workbenchStore.files.get()).length
-      });
-      toast.success(`${version.userName}'s workspace is ready!`);
+      console.log('[RATING] Files loaded successfully');
+      toast.success(`${version.userName}'s design is ready!`);
     } catch (err: any) {
-      console.error('❌ [CODE-REVIEW] Failed to load files:', err);
-      console.error('🔍 [DEBUG-VIEW] ========== VIEW CODE FAILED ==========');
-      console.error('🔍 [DEBUG-VIEW] Error:', err);
-      console.error('🔍 [DEBUG-VIEW] Error message:', err?.message);
-      console.error('🔍 [DEBUG-VIEW] Error stack:', err?.stack);
-      toast.error(`Failed to load workspace: ${err.message || 'Unknown error'}`);
-      setSelectedVersion(null); // Clear selection on error
+      console.error('[RATING] Failed to load files:', err);
+      toast.error(`Failed to load design: ${err.message || 'Unknown error'}`);
+      setSelectedVersion(null);
 
       // Hide workbench on error
       workbenchStore.showWorkbench.set(false);
-      console.log('🔍 [DEBUG-VIEW] Workbench hidden due to error');
     } finally {
       setLoadingFiles(false);
       setLoadingMessage('Loading workspace...');
-      console.log('🔍 [DEBUG-VIEW] ========== VIEW CODE COMPLETE ==========');
-      console.log('🔍 [DEBUG-VIEW] Loading files state set to false');
     }
+  };
+
+  // Navigate to final design page
+  const handleViewFinalDesign = () => {
+    if (isHost) {
+      navigateToNode('winner');
+    }
+    navigate(`/meet/${roomId}/winner`);
   };
 
   // Navigate to workflow
@@ -372,7 +338,7 @@ export default function CodeReviewPage() {
     return (
       <div className="flex items-center justify-center h-screen bg-red-50">
         <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
+          <div className="text-4xl mb-4">Error</div>
           <div className="text-xl font-semibold text-red-700 mb-2">Error</div>
           <div className="text-sm text-red-600">{error}</div>
         </div>
@@ -384,7 +350,7 @@ export default function CodeReviewPage() {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-4xl mb-4">Loading...</div>
           <div className="text-xl font-semibold text-gray-700">
             {!authReady && 'Authenticating...'}
             {authReady && !username && 'Loading identity...'}
@@ -399,8 +365,8 @@ export default function CodeReviewPage() {
   return (
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
-        <RouteGuard nodeId="code-review" roomId={roomId}>
-          <div className="h-screen flex flex-col bg-gradient-to-br from-amber-50 to-orange-50" data-meeting-coding-mode="true">
+        <RouteGuard nodeId="rating" roomId={roomId}>
+          <div className="h-screen flex flex-col bg-gradient-to-br from-amber-50 to-orange-50" data-meeting-rating-mode="true">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
                 <div className="flex flex-col" style={{ height: 'calc(100vh - 8rem)' }}>
@@ -408,8 +374,8 @@ export default function CodeReviewPage() {
                 <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                      <span className="text-3xl">🔍</span>
-                      Code Review
+                      <span className="text-3xl">⭐</span>
+                      Design Review
                     </h1>
                     <p className="text-sm text-gray-600">
                       Room: <span className="font-mono font-semibold">{roomId}</span> | User:{' '}
@@ -418,18 +384,26 @@ export default function CodeReviewPage() {
                         <>
                           {' | '}
                           <span className="text-blue-600 font-semibold">
-                            Viewing: {selectedVersion.userName}'s code
+                            Viewing: {selectedVersion.userName}'s design
                           </span>
                         </>
                       )}
                     </p>
                   </div>
-                  <button
-                    onClick={handleNavigateToWorkflow}
-                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-md"
-                  >
-                    🔀 Workflow
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleViewFinalDesign}
+                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-colors font-medium shadow-md flex items-center gap-2"
+                    >
+                      <span>View Final Design</span>
+                    </button>
+                    <button
+                      onClick={handleNavigateToWorkflow}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-md"
+                    >
+                      Workflow
+                    </button>
+                  </div>
                 </div>
 
                 {/* Sidebar - positioned on left when version selected */}

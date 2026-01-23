@@ -80,6 +80,20 @@ export async function action({ request }: ActionFunctionArgs) {
 
     console.log(`✅ Transcript saved successfully with ID: ${data.id}`);
 
+    // Auto-generate design implications (10 points based on transcript)
+    console.log(`🤖 Auto-generating design implications for room: ${roomName}`);
+    try {
+      // Import and call summarize logic
+      const { generateDesignImplications } = await import('./api.meet.summarize');
+      const cookieHeader = request.headers.get('Cookie');
+      await generateDesignImplications(roomName, authHeader, cookieHeader, undefined);
+      console.log(`✅ Design implications auto-generated for room: ${roomName}`);
+    } catch (summaryError: any) {
+      // Log but don't fail the transcript save if summary generation fails
+      console.error('Failed to auto-generate design implications:', summaryError.message);
+      console.error('Design implications can be generated manually later.');
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

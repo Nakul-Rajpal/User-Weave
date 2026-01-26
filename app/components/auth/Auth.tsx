@@ -51,11 +51,21 @@ export function useAuth() {
     loading,
     signIn: async (email: string, password: string) => {
       try {
+        console.log('🔐 [AUTH HOOK] Attempting sign in for:', email);
         const { data, error } = await signIn(email, password);
-        if (error) throw error;
+        if (error) {
+          console.error('🔐 [AUTH HOOK] Sign in error:', error.message);
+          throw error;
+        }
+        console.log('🔐 [AUTH HOOK] Sign in successful:', {
+          hasUser: !!data.user,
+          hasSession: !!data.session,
+          userId: data.user?.id,
+        });
         return { data, error: null };
       } catch (error: any) {
-        toast.error(error.message);
+        console.error('🔐 [AUTH HOOK] Sign in exception:', error);
+        toast.error(error.message || 'Failed to sign in');
         return { data: null, error };
       }
     },
@@ -94,18 +104,52 @@ export function AuthModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onC
     setLoading(true);
 
     try {
+      console.log('🔐 [AUTH MODAL] Form submitted, isSignUp:', isSignUp);
       if (isSignUp) {
-        await signUp(email, password);
+        const result = await signUp(email, password);
+        console.log('🔐 [AUTH MODAL] Sign up result:', {
+          hasData: !!result.data,
+          hasError: !!result.error,
+          error: result.error?.message,
+        });
       } else {
         const result = await signIn(email, password);
+        console.log('🔐 [AUTH MODAL] Sign in result:', {
+          hasData: !!result.data,
+          hasError: !!result.error,
+          error: result.error?.message,
+        });
         if (result.data && !result.error) {
-          onClose();
-          // Force a small delay to let authStore update, then trigger onSuccess
-          setTimeout(() => {
-            onSuccess?.();
-          }, 100);
+          console.log('🔐 [AUTH MODAL] Sign in successful, waiting for auth state update...');
+          // Wait for the auth state to propagate before calling onSuccess
+          // Poll for the auth store to update with the user
+          let retries = 20; // 20 retries * 100ms = 2 seconds max
+          const checkAuth = () => {
+            const currentAuthState = authStore.get();
+            console.log('🔐 [AUTH MODAL] Checking auth state:', {
+              hasUser: !!currentAuthState.user,
+              retriesLeft: retries,
+            });
+            if (currentAuthState.user || retries === 0) {
+              console.log('🔐 [AUTH MODAL] Auth state ready, closing modal and calling onSuccess');
+              onClose();
+              setTimeout(() => {
+                onSuccess?.();
+              }, 100);
+            } else {
+              retries--;
+              setTimeout(checkAuth, 100);
+            }
+          };
+          checkAuth();
+        } else if (result.error) {
+          console.error('🔐 [AUTH MODAL] Sign in failed:', result.error.message);
+          toast.error(result.error.message || 'Failed to sign in');
         }
       }
+    } catch (error: any) {
+      console.error('🔐 [AUTH MODAL] Exception during form submit:', error);
+      toast.error(error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }

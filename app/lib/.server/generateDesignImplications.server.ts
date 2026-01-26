@@ -1,21 +1,22 @@
 /**
- * API Route: Generate AI Summary from Meeting Transcript
- * POST /api/meet/summarize
- *
- * Fetches the transcript for a room, sends it to an LLM for summarization,
- * and stores the resulting summary points in the database.
+ * Server-only module for generating design implications from meeting transcripts
+ * This is separated from the route file to avoid Remix bundling issues
  */
 
-import { type ActionFunctionArgs } from '@remix-run/node';
 import { createClient } from '@supabase/supabase-js';
 import { generateText } from 'ai';
 import { LLMManager } from '~/lib/modules/llm/manager';
 import { getApiKeysFromCookie, getProviderSettingsFromCookie } from '~/lib/api/cookies';
 import { PROVIDER_LIST } from '~/utils/constants';
+import { getServerEnv } from '~/lib/.server/env.server';
 
 /**
- * Exported function to generate design implications from transcript
- * Can be called from other API routes
+ * Generate design implications from a meeting transcript
+ * @param roomId - The room ID to generate implications for
+ * @param authHeader - Optional Authorization header for user authentication
+ * @param cookieHeader - Optional Cookie header for API keys
+ * @param context - Optional context object (for Vercel/Remix env vars)
+ * @returns Object with success status and summary data
  */
 export async function generateDesignImplications(
   roomId: string,
@@ -24,8 +25,9 @@ export async function generateDesignImplications(
   context?: any
 ) {
   // Initialize Supabase client
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  const env = getServerEnv();
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Collect debug information to return in case of errors
@@ -367,32 +369,4 @@ Return ONLY the JSON array, no additional text.`;
     summary: summaryData,
     pointCount: summaryPoints.length,
   };
-}
-
-export async function action({ request, context }: ActionFunctionArgs) {
-  try {
-    const { roomId } = await request.json();
-
-    // Get headers for passing to the shared function
-    const authHeader = request.headers.get('Authorization');
-    const cookieHeader = request.headers.get('Cookie');
-
-    // Call the shared function
-    const result = await generateDesignImplications(roomId, authHeader, cookieHeader, context);
-
-    return new Response(
-      JSON.stringify(result),
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error: any) {
-    console.error('Failed to generate summary:', error);
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: error.message || 'Failed to generate summary',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
 }

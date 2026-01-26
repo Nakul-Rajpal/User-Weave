@@ -92,7 +92,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
             host_user_id: userId,
             visited_nodes: ['meeting'],
             metadata: {
-              enabledNodes: ['poll', 'design-review', 'coding', 'code-review'] as WorkflowNodeId[],
+              enabledNodes: ['design-implications', 'design', 'rating', 'winner'] as WorkflowNodeId[],
             },
           })
           .select()

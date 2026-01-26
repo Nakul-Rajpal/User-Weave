@@ -14,8 +14,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
+    console.log('🔐 [AUTH PROVIDER] Initializing...');
+
     // Get initial session
     getCurrentUser().then((user) => {
+      console.log('🔐 [AUTH PROVIDER] Initial session check:', {
+        hasUser: !!user,
+        userId: user?.id,
+        email: user?.email,
+      });
       authStore.set({ user, loading: false });
       setLoading(false);
     });
@@ -23,13 +30,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔐 [AUTH PROVIDER] Auth state changed:', {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+        });
         const user = session?.user ?? null;
         authStore.set({ user, loading: false });
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🔐 [AUTH PROVIDER] Cleaning up...');
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
@@ -51,11 +68,21 @@ export function useAuth() {
     loading,
     signIn: async (email: string, password: string) => {
       try {
+        console.log('🔐 [AUTH HOOK] Attempting sign in for:', email);
         const { data, error } = await signIn(email, password);
-        if (error) throw error;
+        if (error) {
+          console.error('🔐 [AUTH HOOK] Sign in error:', error.message);
+          throw error;
+        }
+        console.log('🔐 [AUTH HOOK] Sign in successful:', {
+          hasUser: !!data.user,
+          hasSession: !!data.session,
+          userId: data.user?.id,
+        });
         return { data, error: null };
       } catch (error: any) {
-        toast.error(error.message);
+        console.error('🔐 [AUTH HOOK] Sign in exception:', error);
+        toast.error(error.message || 'Failed to sign in');
         return { data: null, error };
       }
     },
@@ -82,7 +109,7 @@ export function useAuth() {
   };
 }
 
-export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function AuthModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess?: () => void }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -94,12 +121,95 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
     setLoading(true);
 
     try {
+      console.log('🔐 [AUTH MODAL] Form submitted, isSignUp:', isSignUp);
       if (isSignUp) {
-        await signUp(email, password);
+        const result = await signUp(email, password);
+        console.log('🔐 [AUTH MODAL] Sign up result:', {
+          hasData: !!result.data,
+          hasError: !!result.error,
+          error: result.error?.message,
+        });
       } else {
-        await signIn(email, password);
-        onClose();
+        const result = await signIn(email, password);
+        console.log('🔐 [AUTH MODAL] Sign in result:', {
+          hasData: !!result.data,
+          hasError: !!result.error,
+          error: result.error?.message,
+        });
+        if (result.data && !result.error) {
+          console.log('🔐 [AUTH MODAL] Sign in successful, waiting for auth state to propagate...');
+
+          // Wait for Supabase session to be established and authStore to update
+          // Use a combination of polling authStore and listening to auth state change
+          let retries = 30; // 30 retries * 200ms = 6 seconds max
+          let resolved = false;
+
+          // Set up a one-time listener for auth state change
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session?.user && !resolved) {
+              console.log('🔐 [AUTH MODAL] Auth state change detected:', {
+                event,
+                userId: session.user.id,
+              });
+              resolved = true;
+              subscription.unsubscribe();
+
+              // Give React a moment to update before closing modal
+              setTimeout(() => {
+                const currentAuthState = authStore.get();
+                console.log('🔐 [AUTH MODAL] Final auth state check:', {
+                  hasUser: !!currentAuthState.user,
+                  userId: currentAuthState.user?.id,
+                });
+
+                onClose();
+                setTimeout(() => {
+                  onSuccess?.();
+                }, 100);
+              }, 300);
+            }
+          });
+
+          // Also poll authStore as backup
+          const checkAuth = () => {
+            if (resolved) return;
+
+            const currentAuthState = authStore.get();
+            console.log('🔐 [AUTH MODAL] Polling auth store:', {
+              hasUser: !!currentAuthState.user,
+              retriesLeft: retries,
+            });
+
+            if (currentAuthState.user) {
+              console.log('🔐 [AUTH MODAL] Auth detected via polling');
+              resolved = true;
+              subscription.unsubscribe();
+
+              onClose();
+              setTimeout(() => {
+                onSuccess?.();
+              }, 100);
+            } else if (retries > 0) {
+              retries--;
+              setTimeout(checkAuth, 200);
+            } else {
+              console.error('🔐 [AUTH MODAL] Timeout waiting for auth state');
+              resolved = true;
+              subscription.unsubscribe();
+              toast.error('Authentication timeout. Please try refreshing the page.');
+            }
+          };
+
+          // Start polling after a brief delay
+          setTimeout(checkAuth, 200);
+        } else if (result.error) {
+          console.error('🔐 [AUTH MODAL] Sign in failed:', result.error.message);
+          toast.error(result.error.message || 'Failed to sign in');
+        }
       }
+    } catch (error: any) {
+      console.error('🔐 [AUTH MODAL] Exception during form submit:', error);
+      toast.error(error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -171,6 +281,16 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 }
 
 // Default export for convenience - auto-opens the modal
-export default function Auth() {
-  return <AuthModal isOpen={true} onClose={() => {}} />;
+export default function Auth({ onSuccess }: { onSuccess?: () => void } = {}) {
+  const handleSuccess = () => {
+    // Force a page reload to ensure proper re-render after auth state change
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      // Default behavior: reload the page to pick up new auth state
+      window.location.reload();
+    }
+  };
+
+  return <AuthModal isOpen={true} onClose={() => {}} onSuccess={handleSuccess} />;
 }

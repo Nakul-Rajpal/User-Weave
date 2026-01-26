@@ -12,7 +12,7 @@
   },
   "scripts": {
     "deploy": "vercel --prod",
-    "build": "remix vite:build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' remix vite:build",
     "dev": "node pre-start.cjs && remix vite:dev",
     "test": "vitest --run",
     "test:watch": "vitest",
@@ -154,8 +154,6 @@
   },
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",
-    "@iconify-json/ph": "^1.2.1",
-    "@iconify/types": "^2.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/diff": "^5.2.3",

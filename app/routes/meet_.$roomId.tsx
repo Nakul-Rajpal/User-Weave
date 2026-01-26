@@ -72,6 +72,7 @@ export default function MeetingRoom() {
 
   // Show auth modal if not authenticated
   if (!authLoading && !user) {
+    console.log('🔐 [MEETING] Not authenticated, showing login modal');
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
         <div className="max-w-md w-full p-8">
@@ -83,7 +84,10 @@ export default function MeetingRoom() {
               Please sign in to join the meeting room
             </p>
           </div>
-          <Auth />
+          <Auth onSuccess={() => {
+            console.log('🔐 [MEETING] Auth success callback - auth state should update and trigger re-render');
+            // Don't navigate - the component will re-render automatically when authStore updates
+          }} />
         </div>
       </div>
     );

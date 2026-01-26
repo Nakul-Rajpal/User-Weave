@@ -2,7 +2,7 @@
  * Workflow system types for meeting room navigation
  */
 
-export type WorkflowNodeId = 'meeting' | 'poll' | 'design-review' | 'coding' | 'code-review' | 'exit';
+export type WorkflowNodeId = 'meeting' | 'design-implications' | 'design' | 'rating' | 'winner' | 'exit';
 
 export interface WorkflowNode {
   id: WorkflowNodeId;

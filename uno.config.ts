@@ -238,9 +238,13 @@ export default defineConfig({
       },
     }),
     presetIcons({
-      warn: true,
+      warn: false, // Suppress warnings about missing icons (Phosphor icons are loaded via @phosphor-icons/react)
       collections: {
         ...customIconCollection,
+      },
+      extraProperties: {
+        'display': 'inline-block',
+        'vertical-align': 'middle',
       },
       unit: 'em',
     }),

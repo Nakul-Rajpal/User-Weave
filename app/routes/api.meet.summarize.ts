@@ -12,7 +12,6 @@ import { generateText } from 'ai';
 import { LLMManager } from '~/lib/modules/llm/manager';
 import { getApiKeysFromCookie, getProviderSettingsFromCookie } from '~/lib/api/cookies';
 import { PROVIDER_LIST } from '~/utils/constants';
-import { getServerEnv } from '~/lib/.server/env.server';
 
 /**
  * Exported function to generate design implications from transcript
@@ -25,9 +24,8 @@ export async function generateDesignImplications(
   context?: any
 ) {
   // Initialize Supabase client
-  const env = getServerEnv();
-  const supabaseUrl = env.SUPABASE_URL;
-  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Collect debug information to return in case of errors

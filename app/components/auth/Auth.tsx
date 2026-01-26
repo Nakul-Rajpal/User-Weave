@@ -14,8 +14,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
+    console.log('🔐 [AUTH PROVIDER] Initializing...');
+
     // Get initial session
     getCurrentUser().then((user) => {
+      console.log('🔐 [AUTH PROVIDER] Initial session check:', {
+        hasUser: !!user,
+        userId: user?.id,
+        email: user?.email,
+      });
       authStore.set({ user, loading: false });
       setLoading(false);
     });
@@ -23,13 +30,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔐 [AUTH PROVIDER] Auth state changed:', {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+        });
         const user = session?.user ?? null;
         authStore.set({ user, loading: false });
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🔐 [AUTH PROVIDER] Cleaning up...');
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
@@ -120,28 +137,71 @@ export function AuthModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onC
           error: result.error?.message,
         });
         if (result.data && !result.error) {
-          console.log('🔐 [AUTH MODAL] Sign in successful, waiting for auth state update...');
-          // Wait for the auth state to propagate before calling onSuccess
-          // Poll for the auth store to update with the user
-          let retries = 20; // 20 retries * 100ms = 2 seconds max
+          console.log('🔐 [AUTH MODAL] Sign in successful, waiting for auth state to propagate...');
+
+          // Wait for Supabase session to be established and authStore to update
+          // Use a combination of polling authStore and listening to auth state change
+          let retries = 30; // 30 retries * 200ms = 6 seconds max
+          let resolved = false;
+
+          // Set up a one-time listener for auth state change
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session?.user && !resolved) {
+              console.log('🔐 [AUTH MODAL] Auth state change detected:', {
+                event,
+                userId: session.user.id,
+              });
+              resolved = true;
+              subscription.unsubscribe();
+
+              // Give React a moment to update before closing modal
+              setTimeout(() => {
+                const currentAuthState = authStore.get();
+                console.log('🔐 [AUTH MODAL] Final auth state check:', {
+                  hasUser: !!currentAuthState.user,
+                  userId: currentAuthState.user?.id,
+                });
+
+                onClose();
+                setTimeout(() => {
+                  onSuccess?.();
+                }, 100);
+              }, 300);
+            }
+          });
+
+          // Also poll authStore as backup
           const checkAuth = () => {
+            if (resolved) return;
+
             const currentAuthState = authStore.get();
-            console.log('🔐 [AUTH MODAL] Checking auth state:', {
+            console.log('🔐 [AUTH MODAL] Polling auth store:', {
               hasUser: !!currentAuthState.user,
               retriesLeft: retries,
             });
-            if (currentAuthState.user || retries === 0) {
-              console.log('🔐 [AUTH MODAL] Auth state ready, closing modal and calling onSuccess');
+
+            if (currentAuthState.user) {
+              console.log('🔐 [AUTH MODAL] Auth detected via polling');
+              resolved = true;
+              subscription.unsubscribe();
+
               onClose();
               setTimeout(() => {
                 onSuccess?.();
               }, 100);
-            } else {
+            } else if (retries > 0) {
               retries--;
-              setTimeout(checkAuth, 100);
+              setTimeout(checkAuth, 200);
+            } else {
+              console.error('🔐 [AUTH MODAL] Timeout waiting for auth state');
+              resolved = true;
+              subscription.unsubscribe();
+              toast.error('Authentication timeout. Please try refreshing the page.');
             }
           };
-          checkAuth();
+
+          // Start polling after a brief delay
+          setTimeout(checkAuth, 200);
         } else if (result.error) {
           console.error('🔐 [AUTH MODAL] Sign in failed:', result.error.message);
           toast.error(result.error.message || 'Failed to sign in');

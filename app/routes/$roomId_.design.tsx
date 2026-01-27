@@ -12,7 +12,7 @@ import Auth from '~/components/auth/Auth';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
 import RouteGuard from '~/components/meet/RouteGuard';
 import { getLatestRoomDesignChat, getUserForkOfDesign, forkRoomDesignChat, setFinalVersion } from '~/lib/persistence/supabase';
-import { buildDesignPrompt, buildFallbackPrompt } from '~/lib/prompts/design-implications-prompt';
+import { buildDesignPrompt } from '~/lib/prompts/design-implications-prompt';
 import { useStore } from '@nanostores/react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatId } from '~/lib/persistence/useChatHistory';
@@ -138,19 +138,19 @@ function DesignModeClient() {
             const summaryResponse = await fetch(`/api/meet/summary/${roomName}`);
             const summaryData = await summaryResponse.json();
 
-            if (summaryData.success && summaryData.summary?.points?.length > 0) {
-              console.log('[DESIGN_MODE] Found design implications, building prompt...');
-              const prompt = buildDesignPrompt(summaryData.summary.points, roomName);
-              // Navigate with the prompt so it auto-submits
-              navigate(`/${roomName}/design?prompt=${encodeURIComponent(prompt)}`);
-            } else {
-              console.log('[DESIGN_MODE] No design implications found, using fallback prompt');
-              const fallbackPrompt = buildFallbackPrompt();
-              navigate(`/${roomName}/design?prompt=${encodeURIComponent(fallbackPrompt)}`);
-            }
+            // Build prompt with implications if available, otherwise with empty array
+            const points = summaryData.success && summaryData.summary?.points?.length > 0
+              ? summaryData.summary.points
+              : [];
+            console.log('[DESIGN_MODE] Building prompt with', points.length, 'design implications');
+            const prompt = buildDesignPrompt(points, roomName);
+            // Navigate with the prompt so it auto-submits
+            navigate(`/${roomName}/design?prompt=${encodeURIComponent(prompt)}`);
           } catch (err) {
             console.error('[DESIGN_MODE] Failed to fetch design implications:', err);
-            // Continue without auto-prompt
+            // Still send prompt without implications
+            const prompt = buildDesignPrompt([], roomName);
+            navigate(`/${roomName}/design?prompt=${encodeURIComponent(prompt)}`);
           }
 
           setRoomDesignChecked(true);
@@ -343,7 +343,7 @@ function DesignModeClient() {
                     )}
                   </button>
                 </div>
-                <div className="flex-1 min-h-0 overflow-auto">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   <ClientOnly fallback={<BaseChat />}>
                     {() => <Chat />}
                   </ClientOnly>

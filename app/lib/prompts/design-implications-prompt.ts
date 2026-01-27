@@ -67,7 +67,12 @@ export function buildDesignPrompt(implications: DesignImplication[], roomId?: st
   // ============================================================
   // CUSTOMIZE THE MAIN PROMPT BELOW
   // ============================================================
-  const prompt = `
+
+  // Build prompt with or without implications
+  let prompt: string;
+
+  if (implicationsText.trim()) {
+    prompt = `
 Based on our user research meeting, please create a working demo website that addresses the following design implications:
 
 ${implicationsText}
@@ -81,20 +86,20 @@ ${implicationsText}
 
 Please implement a complete working demo that we can review and iterate on. Start with the most critical features identified in the decisions and action items above.
 `.trim();
+  } else {
+    prompt = `
+Based on our user research meeting, please create a working demo website.
+
+## Requirements:
+1. Create a functional, interactive prototype
+2. Use modern, clean UI/UX principles
+3. Make it responsive and accessible
+4. Include realistic sample content and data
+5. Focus on core user flows
+
+Please implement a complete working demo that we can review and iterate on.
+`.trim();
+  }
 
   return prompt;
-}
-
-/**
- * Alternative prompt for when no design implications are available
- */
-export function buildFallbackPrompt(): string {
-  return `
-Please help me create a demo website. I'd like to build a modern, responsive web application.
-
-What kind of application would you like me to help you create? Please describe:
-1. The main purpose of the application
-2. Key features you want to include
-3. Any specific design preferences
-`.trim();
 }

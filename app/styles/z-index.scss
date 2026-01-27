@@ -39,8 +39,8 @@ $zIndexMax: 999;
 // Meeting design mode: adjust workbench position for video strip
 [data-meeting-design-mode='true'] {
   .z-workbench > div {
-    // Adjust for video strip (6rem) + header in design mode
-    top: calc(var(--header-height) + 6rem) !important;
+    // Adjust for video strip (6rem) + custom header (var(--header-height) + py-2 padding = 1rem)
+    top: calc(var(--header-height) + 7rem + 1rem) !important;
     bottom: 0.5rem !important;
   }
 }

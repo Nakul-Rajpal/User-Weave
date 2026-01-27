@@ -32,13 +32,14 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
   });
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <LiveKitRoom
         video={true}
         audio={true}
         token={token}
         serverUrl={serverUrl}
         data-lk-theme="default"
+        className="flex flex-col h-full overflow-hidden"
         onConnected={() => console.log('✅ [VIDEO_STRIP] Connected to LiveKit room:', roomName)}
         onDisconnected={() => {
           console.log('🔌 [VIDEO_STRIP] Disconnected from room');
@@ -46,7 +47,7 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
         }}
       >
         {/* Video tiles strip at top */}
-        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-black`}>
+        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-black flex-shrink-0`}>
           <div className={styles.stripContent}>
             <div className={styles.tilesContainer}>
               <VideoTiles />
@@ -65,8 +66,10 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
           </div>
         </div>
 
-        {/* Render children inside LiveKitRoom context */}
-        {children}
+        {/* Render children inside LiveKitRoom context - fills remaining space */}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {children}
+        </div>
       </LiveKitRoom>
     </div>
   );
@@ -82,16 +85,16 @@ function VideoTiles() {
     <>
       {tracks.slice(0, 6).map((trackRef) => (
         <TrackRefContext.Provider value={trackRef} key={trackRef.participant.sid}>
-          <div className="w-32 h-24 shrink-0 rounded overflow-hidden bg-gray-800 relative">
+          <div className="w-24 h-16 shrink-0 rounded overflow-hidden bg-gray-800 relative">
             <VideoTrack className="w-full h-full object-cover" />
-            <div className="absolute bottom-1 left-1 text-xs text-white bg-black/50 px-1 rounded">
+            <div className="absolute bottom-0.5 left-0.5 text-[10px] text-white bg-black/50 px-1 rounded">
               {trackRef.participant.identity}
             </div>
           </div>
         </TrackRefContext.Provider>
       ))}
       {tracks.length > 6 && (
-        <div className="w-32 h-24 shrink-0 rounded bg-gray-700 flex items-center justify-center text-white">
+        <div className="w-24 h-16 shrink-0 rounded bg-gray-700 flex items-center justify-center text-white text-xs">
           +{tracks.length - 6} more
         </div>
       )}

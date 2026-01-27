@@ -366,7 +366,7 @@ export default function RatingPage() {
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="rating" roomId={roomId}>
-          <div className="h-screen flex flex-col bg-gradient-to-br from-amber-50 to-orange-50" data-meeting-rating-mode="true">
+          <div className="h-screen flex flex-col bg-white" data-meeting-rating-mode="true">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
                 <div className="flex flex-col" style={{ height: 'calc(100vh - 8rem)' }}>

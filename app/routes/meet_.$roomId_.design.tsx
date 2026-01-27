@@ -287,7 +287,7 @@ function DesignModeClient() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-bolt-elements-background-depth-1" data-meeting-design-mode="true">
+    <div className="h-screen flex flex-col overflow-hidden bg-bolt-elements-background-depth-1" data-meeting-design-mode="true">
       <BackgroundRays />
 
       <ClientOnly>
@@ -299,9 +299,9 @@ function DesignModeClient() {
           >
             {/* Bolt.diy UI wrapped with MeetingAuthProvider for LiveKit-based auth */}
             <MeetingAuthProvider>
-              <div className="flex flex-col" style={{ height: 'calc(100vh - 8rem)' }}>
+              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 {/* Custom Header with Send Design button */}
-                <div className="flex items-center justify-between px-4 py-2 bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor">
+                <div className="flex items-center justify-between px-4 py-2 bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor flex-shrink-0">
                   <Header />
                   <button
                     onClick={handleSendDesign}
@@ -322,7 +322,7 @@ function DesignModeClient() {
                     )}
                   </button>
                 </div>
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   <ClientOnly fallback={<BaseChat />}>
                     {() => <Chat />}
                   </ClientOnly>

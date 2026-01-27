@@ -1,9 +1,9 @@
 // Custom styles for VideoTileStrip to constrain LiveKit components
 .videoTileStripContainer {
   // Force strict height constraint - override LiveKit's height: 100%
-  height: 8rem; // 128px (h-32)
-  max-height: 8rem;
-  min-height: 8rem;
+  height: 6rem; // 96px - reduced from 8rem for more content space
+  max-height: 6rem;
+  min-height: 6rem;
   flex-shrink: 0; // Prevent flex container from shrinking this
   overflow: hidden; // Prevent content from expanding beyond bounds
   position: relative;
@@ -11,10 +11,13 @@
 
   // Override LiveKit's .lk-room-container styles that apply height: 100%
   :global(.lk-room-container) {
-    height: 8rem !important;
-    max-height: 8rem !important;
+    height: 100% !important;
+    max-height: 100% !important;
     min-height: auto !important;
     position: relative !important; // Prevent fixed positioning
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   // Ensure control bar fits within the strip
@@ -43,7 +46,7 @@
   // Constrain grid layout if used
   :global(.lk-grid-layout) {
     height: 100% !important;
-    max-height: 8rem !important;
+    max-height: 6rem !important;
   }
 }
 
@@ -53,7 +56,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 // Video tiles container

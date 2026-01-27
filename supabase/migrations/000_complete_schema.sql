@@ -694,27 +694,30 @@ CREATE POLICY "Users can delete their own room design chats"
 -- =============================================
 
 -- Final versions with users view
+-- Note: Uses public.users instead of auth.users to avoid permission issues
+-- The user_name is derived from the email prefix since public.users doesn't store full_name
 CREATE OR REPLACE VIEW public.final_versions_with_users AS
 SELECT
   fv.*,
   pu.email as user_email,
-  au.raw_user_meta_data->>'full_name' as user_name,
-  au.raw_user_meta_data->>'avatar_url' as user_avatar
+  COALESCE(SPLIT_PART(pu.email, '@', 1), 'Unknown') as user_name,
+  NULL::text as user_avatar
 FROM public.final_versions fv
-LEFT JOIN public.users pu ON fv.user_id = pu.id
-LEFT JOIN auth.users au ON fv.user_id = au.id;
+LEFT JOIN public.users pu ON fv.user_id = pu.id;
 
 GRANT SELECT ON public.final_versions_with_users TO authenticated;
 
 -- Final version discussions with users view
+-- Note: Uses public.users instead of auth.users to avoid permission issues
+-- The user_name is derived from the email prefix since public.users doesn't store full_name
 CREATE OR REPLACE VIEW public.final_version_discussions_with_users AS
 SELECT
   d.*,
-  u.email as user_email,
-  u.raw_user_meta_data->>'full_name' as user_name,
-  u.raw_user_meta_data->>'avatar_url' as user_avatar
+  pu.email as user_email,
+  COALESCE(SPLIT_PART(pu.email, '@', 1), 'Unknown') as user_name,
+  NULL::text as user_avatar
 FROM public.final_version_discussions d
-LEFT JOIN auth.users u ON d.user_id = u.id;
+LEFT JOIN public.users pu ON d.user_id = pu.id;
 
 GRANT SELECT ON public.final_version_discussions_with_users TO authenticated;
 

@@ -92,7 +92,7 @@ export default function RatingPage() {
   // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 
@@ -326,12 +326,12 @@ export default function RatingPage() {
     if (isHost) {
       navigateToNode('winner');
     }
-    navigate(`/meet/${roomId}/winner`);
+    navigate(`/${roomId}/winner`);
   };
 
   // Navigate to workflow
   const handleNavigateToWorkflow = () => {
-    navigate(`/meet/${roomId}/workflow`);
+    navigate(`/${roomId}/workflow`);
   };
 
   if (error) {
@@ -369,7 +369,7 @@ export default function RatingPage() {
           <div className="h-screen flex flex-col overflow-hidden bg-white" data-meeting-rating-mode="true">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
-                <div className="flex flex-col" style={{ height: 'calc(100vh - 8rem)' }}>
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 {/* Header */}
                 <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
                   <div>
@@ -399,7 +399,7 @@ export default function RatingPage() {
                     </button>
                     <button
                       onClick={handleNavigateToWorkflow}
-                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-md"
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md"
                     >
                       Workflow
                     </button>

@@ -48,16 +48,22 @@ export function useMeetingContext(): MeetingContext {
   const location = useLocation();
   const params = useParams();
 
-  const isMeeting = location.pathname.startsWith('/meet/');
-  const roomId = params.roomId;
-  const isCodeMode = isMeeting && location.pathname.includes('/code');
+  // Check if we're on a room route (/:roomId or /:roomId/*)
+  // Exclude known non-room routes
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const firstSegment = pathParts[0];
+  const knownNonRoomRoutes = ['api', 'chat', 'git', 'final-versions', 'webcontainer'];
 
-  const basePath = isMeeting && roomId ? `/meet/${roomId}/code` : null;
+  const roomId = params.roomId;
+  const isMeeting = !!roomId || (!!firstSegment && !knownNonRoomRoutes.includes(firstSegment));
+  const isCodeMode = isMeeting && location.pathname.includes('/design');
+
+  const basePath = isMeeting && (roomId || firstSegment) ? `/${roomId || firstSegment}/design` : null;
 
   return {
     isMeeting,
     isCodeMode,
-    roomId,
+    roomId: roomId || firstSegment,
     basePath,
   };
 }

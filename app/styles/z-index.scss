@@ -36,10 +36,11 @@ $zIndexMax: 999;
   z-index: $zIndexMax;
 }
 
-// Meeting coding mode: adjust workbench position for video strip
-[data-meeting-coding-mode='true'] {
+// Meeting design mode: adjust workbench position for video strip
+[data-meeting-design-mode='true'] {
   .z-workbench > div {
-    // Add 8rem to account for video strip at top
-    top: calc(var(--header-height) + 1.2rem + 8rem) !important;
+    // Adjust for video strip (6rem) + header in design mode
+    top: calc(var(--header-height) + 6rem) !important;
+    bottom: 0.5rem !important;
   }
 }

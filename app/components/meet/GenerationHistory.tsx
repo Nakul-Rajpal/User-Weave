@@ -63,14 +63,14 @@ export default function GenerationHistory({ roomId }: GenerationHistoryProps) {
       if (existingFork) {
         console.log('✅ [HISTORY] User has existing fork:', existingFork.url_id);
         // Navigate to existing fork in the meeting room code page
-        navigate(`/meet/${roomId}/code?chat=${existingFork.url_id}`);
+        navigate(`/${roomId}/design?chat=${existingFork.url_id}`);
       } else {
         console.log('🍴 [HISTORY] Creating fork for user...');
         // Create fork for this user
         const forkedChat = await forkRoomDesignChat(chatId, roomId);
         console.log('✅ [HISTORY] Fork created:', forkedChat.url_id);
         // Navigate to new fork in the meeting room code page
-        navigate(`/meet/${roomId}/code?chat=${forkedChat.url_id}`);
+        navigate(`/${roomId}/design?chat=${forkedChat.url_id}`);
       }
     } catch (error: any) {
       console.error('❌ [HISTORY] Failed to access design:', error);

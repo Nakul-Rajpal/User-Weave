@@ -32,7 +32,7 @@ export default function MeetingRoom() {
   // Fetch LiveKit token after user is authenticated
   useEffect(() => {
     if (!roomName) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 
@@ -98,7 +98,7 @@ export default function MeetingRoom() {
       <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
         <div className="text-xl text-red-500">Error: {error}</div>
         <button
-          onClick={() => navigate('/meet')}
+          onClick={() => navigate('/')}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Go Back

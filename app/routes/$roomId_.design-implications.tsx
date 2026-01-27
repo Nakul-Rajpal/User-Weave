@@ -65,7 +65,7 @@ export default function DesignImplicationsPage() {
   // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 
@@ -137,7 +137,7 @@ export default function DesignImplicationsPage() {
     if (isHost) {
       navigateToNode('meeting');
     }
-    navigate(`/meet/${roomId}`);
+    navigate(`/${roomId}`);
   };
 
   // Navigate to design stage
@@ -145,7 +145,7 @@ export default function DesignImplicationsPage() {
     if (isHost) {
       navigateToNode('design');
     }
-    navigate(`/meet/${roomId}/design`);
+    navigate(`/${roomId}/design`);
   };
 
   if (error) {
@@ -180,16 +180,16 @@ export default function DesignImplicationsPage() {
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="design-implications" roomId={roomId}>
-          <div className="h-screen flex flex-col">
+          <div className="h-screen flex flex-col overflow-hidden bg-white">
             <VideoTileStrip
               token={token}
               serverUrl={serverUrl}
               roomName={roomId}
             >
               <MeetingAuthProvider>
-                <div className="flex flex-col bg-gradient-to-br from-violet-50 to-purple-50" style={{ height: 'calc(100vh - 8rem)' }}>
+                <div className="flex flex-col h-full overflow-hidden">
                   {/* Header */}
-                  <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+                  <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
                     <div>
                       <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                         <span className="text-3xl">💡</span>
@@ -206,15 +206,15 @@ export default function DesignImplicationsPage() {
                   </div>
 
                   {/* Instructions Banner */}
-                  <div className="bg-violet-100 border-b border-violet-200 px-6 py-3">
-                    <p className="text-sm text-violet-800">
+                  <div className="bg-blue-50 border-b border-blue-200 px-6 py-3 flex-shrink-0">
+                    <p className="text-sm text-blue-800">
                       <strong>All participants</strong> can edit, add, or remove design implications below.
                       Once everyone is satisfied, proceed to the design stage.
                     </p>
                   </div>
 
                   {/* Main Content - Design Implications Panel with Edit Access for Everyone */}
-                  <div className="flex-1 overflow-auto">
+                  <div className="flex-1 min-h-0 overflow-hidden">
                     <ClientOnly fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
                       {() => (
                         <DesignImplicationsPanel roomId={roomId} readOnly={false} />
@@ -223,7 +223,7 @@ export default function DesignImplicationsPage() {
                   </div>
 
                   {/* Navigation Footer */}
-                  <div className="bg-white border-t border-gray-200 px-6 py-4">
+                  <div className="bg-white border-t border-gray-200 px-6 py-4 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <button
                         onClick={handleBackToMeeting}

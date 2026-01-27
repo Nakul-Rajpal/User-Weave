@@ -88,7 +88,7 @@ export default function GenerateDesignButton({
 
       // Navigate admin to the code page to view the generated design
       setTimeout(() => {
-        navigate(`/meet/${roomId}/code?chat=${data.chatId}`);
+        navigate(`/${roomId}/design?chat=${data.chatId}`);
         setGenerating(false);
         setProgress(0);
         setProgressMessage('');

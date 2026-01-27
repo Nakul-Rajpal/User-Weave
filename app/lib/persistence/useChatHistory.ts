@@ -50,21 +50,21 @@ export function useChatHistory() {
 
   // Detect if we're in a meeting context to adjust navigation behavior
   const meetingContext = useMemo(() => {
-    const isMeeting = location.pathname.startsWith('/meet/');
-    if (!isMeeting) {
+    // Check if we're on a room route (/:roomId or /:roomId/*)
+    // Exclude known non-room routes like /api, /chat, etc.
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const firstSegment = pathParts[0];
+
+    // Skip if it's the index page or a known non-room route
+    if (!firstSegment || firstSegment === 'api' || firstSegment === 'chat' || firstSegment === 'git' || firstSegment === 'final-versions') {
       return null;
     }
 
-    // Extract room ID from path like /meet/room-xyz/code
-    const match = location.pathname.match(/^\/meet\/([^\/]+)/);
-    const roomId = match?.[1];
-
-    if (!roomId) {
-      return null;
-    }
+    // Assume first segment is a roomId if it's not a known route
+    const roomId = firstSegment;
 
     return {
-      basePath: `/meet/${roomId}/code`,
+      basePath: `/${roomId}/design`,
       roomId,
     };
   }, [location.pathname]);

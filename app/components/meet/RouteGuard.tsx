@@ -94,13 +94,13 @@ export default function RouteGuard({ nodeId, roomId, children }: RouteGuardProps
 
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => navigate(`/meet/${roomId}/workflow`)}
+              onClick={() => navigate(`/${roomId}/workflow`)}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
             >
               🔀 View Workflow
             </button>
             <button
-              onClick={() => navigate(`/meet/${roomId}`)}
+              onClick={() => navigate(`/${roomId}`)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               📹 Back to Meeting

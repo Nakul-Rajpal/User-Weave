@@ -12,6 +12,7 @@ import Auth from '~/components/auth/Auth';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
 import RouteGuard from '~/components/meet/RouteGuard';
 import { getLatestRoomDesignChat, getUserForkOfDesign, forkRoomDesignChat, setFinalVersion } from '~/lib/persistence/supabase';
+import { buildDesignPrompt, buildFallbackPrompt } from '~/lib/prompts/design-implications-prompt';
 import { useStore } from '@nanostores/react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatId } from '~/lib/persistence/useChatHistory';
@@ -90,13 +91,13 @@ function DesignModeClient() {
   // Show auth modal if not authenticated
   if (!authLoading && !user) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
         <div className="max-w-md w-full p-8">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Login Required
             </h1>
-            <p className="text-bolt-elements-textSecondary">
+            <p className="text-gray-600">
               Please sign in to access the design stage
             </p>
           </div>
@@ -112,10 +113,11 @@ function DesignModeClient() {
       return;
     }
 
-    // Skip if there's already a chat ID in the URL (user navigated to specific chat)
+    // Skip if there's already a chat ID or prompt in the URL
     const chatFromUrl = searchParams.get('chat');
-    if (chatFromUrl) {
-      console.log('[DESIGN_MODE] Chat ID in URL, skipping room design check');
+    const promptFromUrl = searchParams.get('prompt');
+    if (chatFromUrl || promptFromUrl) {
+      console.log('[DESIGN_MODE] Chat ID or prompt in URL, skipping room design check');
       setRoomDesignChecked(true);
       return;
     }
@@ -129,7 +131,28 @@ function DesignModeClient() {
         const latestDesign = await getLatestRoomDesignChat(roomName);
 
         if (!latestDesign) {
-          console.log('[DESIGN_MODE] No room design available');
+          console.log('[DESIGN_MODE] No room design available, fetching design implications...');
+
+          // Fetch design implications to create initial prompt
+          try {
+            const summaryResponse = await fetch(`/api/meet/summary/${roomName}`);
+            const summaryData = await summaryResponse.json();
+
+            if (summaryData.success && summaryData.summary?.points?.length > 0) {
+              console.log('[DESIGN_MODE] Found design implications, building prompt...');
+              const prompt = buildDesignPrompt(summaryData.summary.points, roomName);
+              // Navigate with the prompt so it auto-submits
+              navigate(`/${roomName}/design?prompt=${encodeURIComponent(prompt)}`);
+            } else {
+              console.log('[DESIGN_MODE] No design implications found, using fallback prompt');
+              const fallbackPrompt = buildFallbackPrompt();
+              navigate(`/${roomName}/design?prompt=${encodeURIComponent(fallbackPrompt)}`);
+            }
+          } catch (err) {
+            console.error('[DESIGN_MODE] Failed to fetch design implications:', err);
+            // Continue without auto-prompt
+          }
+
           setRoomDesignChecked(true);
           return;
         }
@@ -142,7 +165,7 @@ function DesignModeClient() {
         if (existingFork) {
           console.log('[DESIGN_MODE] User already has fork, navigating:', existingFork.url_id);
           // Navigate to existing fork
-          navigate(`/meet/${roomName}/design?chat=${existingFork.url_id}`);
+          navigate(`/${roomName}/design?chat=${existingFork.url_id}`);
           setRoomDesignChecked(true);
           return;
         }
@@ -154,7 +177,7 @@ function DesignModeClient() {
         console.log('[DESIGN_MODE] Fork created, navigating to:', forkedChat.url_id);
 
         // Navigate to the forked chat
-        navigate(`/meet/${roomName}/design?chat=${forkedChat.url_id}`);
+        navigate(`/${roomName}/design?chat=${forkedChat.url_id}`);
         setRoomDesignChecked(true);
       } catch (error: any) {
         console.error('[DESIGN_MODE] Failed to check/fork room design:', error);
@@ -183,8 +206,8 @@ function DesignModeClient() {
     console.log('[DESIGN_MODE] Token fetch effect triggered:', { roomName, authReady, username });
 
     if (!roomName) {
-      console.log('[DESIGN_MODE] No room name, navigating to /meet');
-      navigate('/meet');
+      console.log('[DESIGN_MODE] No room name, navigating to /');
+      navigate('/');
       return;
     }
 
@@ -243,7 +266,7 @@ function DesignModeClient() {
       if (isHost) {
         navigateToNode('rating');
       }
-      navigate(`/meet/${roomName}/rating`);
+      navigate(`/${roomName}/rating`);
     } catch (error: any) {
       console.error('[DESIGN_MODE] Failed to send design:', error);
       toast.error(error.message || 'Failed to send design');
@@ -254,10 +277,10 @@ function DesignModeClient() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
         <div className="text-xl text-red-500">Error: {error}</div>
         <button
-          onClick={() => navigate('/meet')}
+          onClick={() => navigate('/')}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Go Back
@@ -270,10 +293,10 @@ function DesignModeClient() {
   // MeetingAuthProvider will handle Supabase session verification
   if (!authReady || !username || !token || !serverUrl || !isChatReady || checkingRoomDesign) {
     return (
-      <div className="flex items-center justify-center h-screen bg-bolt-elements-background-depth-1">
+      <div className="flex items-center justify-center h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-bolt-elements-textPrimary"></div>
-          <p className="text-bolt-elements-textSecondary">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-800"></div>
+          <p className="text-gray-600">
             {!authReady && 'Authenticating...'}
             {authReady && !username && 'Loading identity...'}
             {authReady && username && checkingRoomDesign && 'Loading room design...'}
@@ -286,7 +309,7 @@ function DesignModeClient() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white" data-meeting-design-mode="true">
+    <div className="h-screen flex flex-col bg-white" data-meeting-design-mode="true" data-theme="light">
 
       <ClientOnly>
         {() => (
@@ -297,9 +320,9 @@ function DesignModeClient() {
           >
             {/* Bolt.diy UI wrapped with MeetingAuthProvider for LiveKit-based auth */}
             <MeetingAuthProvider>
-              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="flex flex-col flex-1 min-h-0 overflow-hidden" data-theme="light">
                 {/* Custom Header with Send Design button */}
-                <div className="flex items-center justify-between px-4 py-2 bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor flex-shrink-0">
+                <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm">
                   <Header />
                   <button
                     onClick={handleSendDesign}
@@ -349,7 +372,7 @@ export default function DesignModePage() {
   // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 
@@ -392,7 +415,7 @@ export default function DesignModePage() {
   }
 
   return (
-    <ClientOnly fallback={<div className="flex items-center justify-center h-screen bg-bolt-elements-background-depth-1"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-bolt-elements-textPrimary"></div></div>}>
+    <ClientOnly fallback={<div className="flex items-center justify-center h-screen bg-white"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-800"></div></div>}>
       {() => (
         <RouteGuard nodeId="design" roomId={roomId}>
           <DesignModeClient />

@@ -53,7 +53,7 @@ export default function WorkflowPage() {
   // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 

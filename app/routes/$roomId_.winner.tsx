@@ -92,7 +92,7 @@ export default function WinnerPage() {
   // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
-      navigate('/meet');
+      navigate('/');
       return;
     }
 
@@ -276,12 +276,12 @@ export default function WinnerPage() {
 
   // Navigate to workflow
   const handleNavigateToWorkflow = () => {
-    navigate(`/meet/${roomId}/workflow`);
+    navigate(`/${roomId}/workflow`);
   };
 
   // Navigate back to rating
   const handleBackToRating = () => {
-    navigate(`/meet/${roomId}/rating`);
+    navigate(`/${roomId}/rating`);
   };
 
   if (error) {
@@ -316,10 +316,10 @@ export default function WinnerPage() {
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="winner" roomId={roomId}>
-          <div className="h-screen flex flex-col bg-gradient-to-br from-pink-50 to-rose-50" data-meeting-winner-mode="true">
+          <div className="h-screen flex flex-col overflow-hidden bg-white" data-meeting-winner-mode="true">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
-                <div className="flex flex-col" style={{ height: 'calc(100vh - 8rem)' }}>
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                   {/* Header */}
                   <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
                     <div>
@@ -341,7 +341,7 @@ export default function WinnerPage() {
                       </button>
                       <button
                         onClick={handleNavigateToWorkflow}
-                        className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors font-medium shadow-md"
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md"
                       >
                         Workflow
                       </button>
@@ -352,7 +352,7 @@ export default function WinnerPage() {
                   {loading ? (
                     <div className="flex items-center justify-center flex-1">
                       <div className="text-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-pink-500 mx-auto mb-4" />
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4" />
                         <p className="text-gray-600">Determining final design...</p>
                       </div>
                     </div>
@@ -404,7 +404,7 @@ export default function WinnerPage() {
                           Submit your design in the Design stage to see it here!
                         </p>
                         <button
-                          onClick={() => navigate(`/meet/${roomId}/design`)}
+                          onClick={() => navigate(`/${roomId}/design`)}
                           className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
                         >
                           Go to Design Stage
@@ -417,7 +417,7 @@ export default function WinnerPage() {
                   {loadingFiles && (
                     <div className="flex-1 flex items-center justify-center bg-gray-100">
                       <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4 shadow-lg">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-pink-500" />
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500" />
                         <p className="text-gray-800 font-semibold">{loadingMessage}</p>
                         {loadingMessage.includes('Installing') && (
                           <p className="text-gray-600 text-sm">

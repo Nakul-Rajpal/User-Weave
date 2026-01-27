@@ -10,7 +10,7 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     id: 'meeting',
     label: 'Meeting',
     description: 'Video conference with all participants',
-    route: '/meet/:roomId',
+    route: '/:roomId',
     icon: '📹',
     color: '#3b82f6', // blue-500
   },
@@ -18,7 +18,7 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     id: 'design-implications',
     label: 'Design Implications',
     description: 'AI-generated design implications from transcript',
-    route: '/meet/:roomId/design-implications',
+    route: '/:roomId/design-implications',
     icon: '💡',
     color: '#8b5cf6', // violet-500
   },
@@ -26,7 +26,7 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     id: 'design',
     label: 'Design Stage',
     description: 'Individual design work with LLM assistance',
-    route: '/meet/:roomId/design',
+    route: '/:roomId/design',
     icon: '🎨',
     color: '#10b981', // green-500
   },
@@ -34,7 +34,7 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     id: 'rating',
     label: 'Rating',
     description: 'Rate and discuss submitted designs',
-    route: '/meet/:roomId/rating',
+    route: '/:roomId/rating',
     icon: '⭐',
     color: '#f59e0b', // amber-500
   },
@@ -42,7 +42,7 @@ export const WORKFLOW_NODES: WorkflowNode[] = [
     id: 'winner',
     label: 'Final Design',
     description: 'Group-selected final design',
-    route: '/meet/:roomId/winner',
+    route: '/:roomId/winner',
     icon: '✅',
     color: '#ec4899', // pink-500
   },
@@ -139,7 +139,7 @@ export function getNodeById(nodeId: string): WorkflowNode | undefined {
 // Helper function to get route for a node with room ID
 export function getNodeRoute(nodeId: string, roomId: string): string {
   const node = getNodeById(nodeId);
-  if (!node) return '/meet';
+  if (!node) return '/';
   return node.route.replace(':roomId', roomId);
 }
 

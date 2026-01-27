@@ -83,7 +83,7 @@ export default function WorkflowCanvas({ roomId }: WorkflowCanvasProps) {
 
         if (confirmExit) {
           // Navigate to meeting lobby
-          navigate('/meet');
+          navigate('/');
         }
         return;
       }

@@ -43,7 +43,7 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
         onConnected={() => console.log('✅ [VIDEO_STRIP] Connected to LiveKit room:', roomName)}
         onDisconnected={() => {
           console.log('🔌 [VIDEO_STRIP] Disconnected from room');
-          navigate('/meet');
+          navigate('/');
         }}
       >
         {/* Video tiles strip at top */}
@@ -57,7 +57,7 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
               <ControlBar variation="minimal" />
 
               <button
-                onClick={() => navigate(`/meet/${roomName}/workflow`)}
+                onClick={() => navigate(`/${roomName}/workflow`)}
                 className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 whitespace-nowrap text-sm"
               >
                 🔀 Workflow

@@ -50,7 +50,7 @@ export default function VideoConference({
       await transcriptPanelRef.current.saveTranscripts();
       console.log('✅ Transcripts saved, navigating to workflow');
     }
-    navigate(`/meet/${roomName}/workflow`);
+    navigate(`/${roomName}/workflow`);
   };
 
   const handleLeaveRoom = async () => {
@@ -67,7 +67,7 @@ export default function VideoConference({
 
     // Small delay to ensure download triggers
     setTimeout(() => {
-      navigate('/meet');
+      navigate('/');
     }, 500);
   };
 
@@ -82,7 +82,7 @@ export default function VideoConference({
       onConnected={() => console.log('Connected to room:', roomName)}
       onDisconnected={() => {
         console.log('Disconnected from room');
-        navigate('/meet');
+        navigate('/');
       }}
     >
       <div className="h-screen flex bg-gray-900">

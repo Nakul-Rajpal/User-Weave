@@ -7,7 +7,6 @@ import { MeetingAuthProvider } from '~/components/meet/MeetingAuthProvider';
 import { Chat } from '~/components/chat/Chat.client';
 import { BaseChat } from '~/components/chat/BaseChat';
 import { Header } from '~/components/header/Header';
-import BackgroundRays from '~/components/ui/BackgroundRays';
 import { useAuth } from '~/components/auth/Auth';
 import Auth from '~/components/auth/Auth';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
@@ -287,8 +286,7 @@ function DesignModeClient() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-bolt-elements-background-depth-1" data-meeting-design-mode="true">
-      <BackgroundRays />
+    <div className="h-screen flex flex-col bg-white" data-meeting-design-mode="true">
 
       <ClientOnly>
         {() => (

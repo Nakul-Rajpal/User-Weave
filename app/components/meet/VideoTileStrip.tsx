@@ -31,15 +31,17 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
     hasChildren: !!children,
   });
 
+  // In design mode we want a fully white page background, so use bg-white here.
+  // The video tiles themselves still manage their own darker backgrounds.
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-white">
       <LiveKitRoom
         video={true}
         audio={true}
         token={token}
         serverUrl={serverUrl}
         data-lk-theme="default"
-        className="flex flex-col h-full overflow-hidden"
+        className="flex flex-col min-h-screen"
         onConnected={() => console.log('✅ [VIDEO_STRIP] Connected to LiveKit room:', roomName)}
         onDisconnected={() => {
           console.log('🔌 [VIDEO_STRIP] Disconnected from room');
@@ -66,8 +68,8 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
           </div>
         </div>
 
-        {/* Render children inside LiveKitRoom context - fills remaining space */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        {/* Render children inside LiveKitRoom context - fills remaining space, allow page scroll */}
+        <div className="flex-1 min-h-0">
           {children}
         </div>
       </LiveKitRoom>

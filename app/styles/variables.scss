@@ -258,9 +258,9 @@
 [data-meeting-design-mode='true'] {
   --bolt-elements-borderColor: theme('colors.alpha.gray.10');
   --bolt-elements-borderColorActive: theme('colors.accent.600');
-  --bolt-elements-bg-depth-1: theme('colors.white');
-  --bolt-elements-bg-depth-2: theme('colors.gray.50');
-  --bolt-elements-bg-depth-3: theme('colors.gray.200');
+  --bolt-elements-bg-depth-1: theme('colors.white');       /* page background */
+  --bolt-elements-bg-depth-2: theme('colors.white');       /* panels */
+  --bolt-elements-bg-depth-3: theme('colors.gray.100');    /* subtle accents */
   --bolt-elements-bg-depth-4: theme('colors.alpha.gray.5');
   --bolt-elements-textPrimary: theme('colors.gray.950');
   --bolt-elements-textSecondary: theme('colors.gray.600');
@@ -282,7 +282,7 @@
   --bolt-elements-artifacts-background: theme('colors.white');
   --bolt-elements-artifacts-backgroundHover: theme('colors.alpha.gray.2');
   --bolt-elements-actions-background: theme('colors.white');
-  --bolt-elements-messages-background: theme('colors.gray.100');
+  --bolt-elements-messages-background: theme('colors.white'); /* chat background fully white */
   --bolt-elements-dividerColor: theme('colors.gray.100');
   --bolt-elements-prompt-background: theme('colors.alpha.white.80');
   --bolt-elements-terminals-background: theme('colors.white');

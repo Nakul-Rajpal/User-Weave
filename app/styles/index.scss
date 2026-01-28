@@ -71,3 +71,10 @@ body {
   // Firefox support for inverted colors
   scrollbar-color: color-mix(in srgb, var(--bolt-elements-textPrimary), transparent 50%) transparent;
 }
+
+/* Design page tweaks */
+
+/* Hide the UserWeave home link inside the header only in design mode */
+[data-meeting-design-mode='true'] header .z-logo a[href="/"] {
+  display: none;
+}

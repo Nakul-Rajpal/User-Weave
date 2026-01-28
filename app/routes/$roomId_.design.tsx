@@ -201,6 +201,12 @@ function DesignModeClient() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Show workbench immediately when design page loads (side-by-side layout)
+  useEffect(() => {
+    console.log('[DESIGN_MODE] Showing workbench for side-by-side layout');
+    workbenchStore.showWorkbench.set(true);
+  }, []);
+
   // Fetch LiveKit token after auth is ready
   useEffect(() => {
     console.log('[DESIGN_MODE] Token fetch effect triggered:', { roomName, authReady, username });

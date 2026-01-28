@@ -57,13 +57,6 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
 
             <div className={styles.controlsContainer}>
               <ControlBar variation="minimal" />
-
-              <button
-                onClick={() => navigate(`/${roomName}/workflow`)}
-                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 whitespace-nowrap text-sm"
-              >
-                🔀 Workflow
-              </button>
             </div>
           </div>
         </div>

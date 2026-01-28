@@ -34,6 +34,25 @@
     font-size: 0.875rem !important;
   }
 
+  // Fix icon and caret alignment in toggle buttons
+  :global(.lk-button-group) {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  :global(.lk-button-group-button) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  :global(.lk-button-group-menu-button) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.25rem !important;
+  }
+
   // Prevent LiveKit overlays from escaping or covering content
   :global(.lk-toast),
   :global(.lk-device-menu) {

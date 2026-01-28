@@ -49,7 +49,7 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
         }}
       >
         {/* Video tiles strip at top */}
-        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-black flex-shrink-0`}>
+        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-white flex-shrink-0`}>
           <div className={styles.stripContent}>
             <div className={styles.tilesContainer}>
               <VideoTiles />

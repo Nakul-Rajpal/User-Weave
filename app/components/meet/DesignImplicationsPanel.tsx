@@ -248,7 +248,7 @@ export default function DesignImplicationsPanel({ roomId, readOnly = false }: De
   const summarySource = summary?.llmModel ? 'ai_generated' : 'manual';
 
   return (
-    <div className="h-full flex flex-col p-6 bg-gray-50">
+    <div className="h-full flex flex-col p-6 bg-white">
       {/* Header */}
       <div className="mb-4">
         <div className="flex items-center justify-between">

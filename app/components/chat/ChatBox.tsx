@@ -162,7 +162,12 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
         </div>
       )}
       <div
-        className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}
+        className={classNames(
+          'relative shadow-xs border border-bolt-elements-borderColor rounded-lg',
+          // Ensure the message input area always sits on a solid white surface,
+          // especially in design/workflow pages where the rest of the UI is white.
+          'bg-white',
+        )}
       >
         <textarea
           ref={props.textareaRef}

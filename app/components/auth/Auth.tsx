@@ -27,7 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes. When session is null, re-fetch with getCurrentUser()
+    // so we don't clear the user on a spurious INITIAL_SESSION (or similar) that fires
+    // after we've already shown the lobby form and causes "content loads then disappears".
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔐 [AUTH PROVIDER] Auth state changed:', {
@@ -37,9 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           userId: session?.user?.id,
           email: session?.user?.email,
         });
-        const user = session?.user ?? null;
-        authStore.set({ user, loading: false });
-        setLoading(false);
+        if (session?.user) {
+          authStore.set({ user: session.user, loading: false });
+          setLoading(false);
+        } else {
+          const confirmedUser = await getCurrentUser();
+          authStore.set({ user: confirmedUser, loading: false });
+          setLoading(false);
+        }
       }
     );
 

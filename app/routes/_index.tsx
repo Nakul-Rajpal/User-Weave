@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@remix-run/react';
 import { useAuth } from '~/components/auth/Auth';
 import Auth from '~/components/auth/Auth';
@@ -18,6 +18,11 @@ export default function MeetLobby() {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [claiming, setClaiming] = useState(false);
+
+  // Keep lobby content visible: scroll to top on mount so ScrollRestoration doesn’t leave content off-screen
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleAdminClaim = async () => {
     if (!claimAdmin) return true; // Not claiming admin, proceed normally
@@ -118,7 +123,7 @@ export default function MeetLobby() {
     <ImmersiveBackground>
       <div className="flex flex-col items-center justify-center flex-1 p-6 sm:p-8">
         <div className="max-w-md w-full space-y-8">
-          <div className="text-center animate-fade-in-up animate-fade-in-up-delay-1">
+          <div className="text-center animate-fade-in-up-delay-1">
             <h1 className="text-4xl sm:text-5xl font-bold mb-2 bg-gradient-to-r from-bolt-elements-textPrimary via-accent-600 to-accent-500 bg-clip-text text-transparent">
               Video Meetings
             </h1>
@@ -128,7 +133,7 @@ export default function MeetLobby() {
           </div>
 
           <div
-            className="space-y-4 p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl shadow-xl animate-fade-in-up animate-fade-in-up-delay-2"
+            className="space-y-4 p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl shadow-xl animate-fade-in-up-delay-2"
           >
             <input
               type="text"
@@ -204,7 +209,7 @@ export default function MeetLobby() {
             </button>
           </div>
 
-          <div className="text-sm text-bolt-elements-textSecondary text-center p-4 rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-white/10 animate-fade-in-up animate-fade-in-up-delay-3">
+          <div className="text-sm text-bolt-elements-textSecondary text-center p-4 rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-white/10 animate-fade-in-up-delay-3">
             <p className="font-medium text-bolt-elements-textPrimary mb-2">Features</p>
             <ul className="space-y-1.5">
               <li className="flex items-center justify-center gap-2">✓ Multi-participant video conferencing</li>

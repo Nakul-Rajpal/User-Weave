@@ -18,6 +18,20 @@ html[data-design-page='true'] body {
   --workbench-inner-width: 66.667%;
   --workbench-top: calc(6rem + var(--header-height, 54px) + 0.5rem);
 
+  /* Preview “fullscreen” in design mode: expand below header so Send Design stays visible */
+  [data-preview-maximized='true'] {
+    position: fixed !important;
+    top: calc(6rem + var(--header-height, 54px) + 0.5rem) !important;
+    left: 33.333% !important;
+    right: 0 !important;
+    bottom: 0.5rem !important;
+    width: 66.667% !important;
+    height: auto !important;
+    z-index: 50;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+
   /* Light theme — hardcoded hex only */
   --bolt-elements-borderColor: rgba(0, 0, 0, 0.06);
   --bolt-elements-borderColorActive: #8a5fff;

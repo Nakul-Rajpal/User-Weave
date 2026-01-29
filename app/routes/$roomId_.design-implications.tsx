@@ -156,14 +156,6 @@ export default function DesignImplicationsPage() {
                     </p>
                   </div>
 
-                  {/* Instructions Banner - accent glass */}
-                  <div className="px-6 py-3 flex-shrink-0 border-b border-accent-500/20 bg-accent-500/10 backdrop-blur-sm">
-                    <p className="text-sm text-bolt-elements-textPrimary">
-                      <strong>All participants</strong> can edit, add, or remove design implications below.
-                      Once everyone is satisfied, proceed to the design stage.
-                    </p>
-                  </div>
-
                   {/* Main Content */}
                   <div className="flex-1 min-h-0 overflow-hidden">
                     <ClientOnly fallback={<div className="flex items-center justify-center h-64 text-bolt-elements-textSecondary">Loading...</div>}>

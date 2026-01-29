@@ -56,6 +56,8 @@ export const Preview = memo(({ setSelectedElement }: PreviewProps) => {
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [isDesignMode, setIsDesignMode] = useState(false);
   const hasSelectedPreview = useRef(false);
   const previews = useStore(workbenchStore.previews);
   const activePreview = previews[activePreviewIndex];
@@ -111,6 +113,11 @@ export const Preview = memo(({ setSelectedElement }: PreviewProps) => {
     }
   }, [previews, findMinPortIndex]);
 
+  useEffect(() => {
+    const inDesignMode = !!document.querySelector('[data-meeting-design-mode="true"]');
+    setIsDesignMode(inDesignMode);
+  }, []);
+
   const reloadPreview = () => {
     if (iframeRef.current) {
       iframeRef.current.src = iframeRef.current.src;
@@ -118,6 +125,10 @@ export const Preview = memo(({ setSelectedElement }: PreviewProps) => {
   };
 
   const toggleFullscreen = async () => {
+    if (isDesignMode) {
+      setIsMaximized((prev) => !prev);
+      return;
+    }
     if (!isFullscreen && containerRef.current) {
       await containerRef.current.requestFullscreen();
     } else if (document.fullscreenElement) {
@@ -136,6 +147,8 @@ export const Preview = memo(({ setSelectedElement }: PreviewProps) => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
+
+  const isExpanded = isFullscreen || isMaximized;
 
   const toggleDeviceMode = () => {
     setIsDeviceModeOn((prev) => !prev);
@@ -733,9 +746,9 @@ export const Preview = memo(({ setSelectedElement }: PreviewProps) => {
             title={isInspectorMode ? 'Disable Element Inspector' : 'Enable Element Inspector'}
           />
           <IconButton
-            icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
+            icon={isExpanded ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
             onClick={toggleFullscreen}
-            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+            title={isExpanded ? 'Exit Full Screen' : 'Full Screen'}
           />
 
           <div className="flex items-center relative">

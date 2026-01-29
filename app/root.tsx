@@ -89,7 +89,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
-      <ScrollRestoration />
+      <ScrollRestoration
+        getKey={(location) => {
+          // Lobby (create meeting page): always start at top so content doesn’t appear then disappear
+          if (location.pathname === '/') return location.key;
+          return location.pathname;
+        }}
+      />
       <Scripts />
     </>
   );

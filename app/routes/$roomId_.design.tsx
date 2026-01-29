@@ -252,7 +252,7 @@ function DesignModeClient() {
             <MeetingAuthProvider>
               {/* Two-box layout: header + content (1/3 chat, 2/3 workbench via CSS variables) */}
               <div className="flex flex-col flex-1 min-h-0 h-full" data-theme="light">
-                <header className="flex items-center justify-between px-4 h-[var(--header-height)] flex-shrink-0 border-b border-bolt-elements-borderColor bg-bolt-elements-bg-depth-1">
+                <header className="flex items-center justify-between px-4 h-[var(--header-height)] flex-shrink-0 border-b border-gray-300 bg-gray-100">
                   <Header />
                   <button
                     type="button"

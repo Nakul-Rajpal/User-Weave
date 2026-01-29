@@ -366,98 +366,87 @@ export default function RatingPage() {
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="rating" roomId={roomId}>
-          <div className="h-screen flex flex-col overflow-hidden bg-white" data-meeting-rating-mode="true">
+          <div className="min-h-screen flex flex-col bg-bolt-elements-bg-depth-1 overflow-hidden" data-meeting-rating-mode="true" data-theme="light">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
-                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                      <span className="text-3xl">⭐</span>
-                      Design Review
-                    </h1>
-                    <p className="text-sm text-gray-600">
-                      Room: <span className="font-mono font-semibold">{roomId}</span> | User:{' '}
-                      <span className="font-semibold">{username}</span>
-                      {selectedVersion && (
-                        <>
-                          {' | '}
-                          <span className="text-blue-600 font-semibold">
-                            Viewing: {selectedVersion.userName}'s design
-                          </span>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
+                {/* Two-box layout matching design page: header + content (1/3 sidebar, 2/3 workbench) */}
+                <div className="flex flex-col flex-1 min-h-0 h-full" data-theme="light">
+                  {/* Header - matching design page style */}
+                  <header className="flex items-center justify-between px-4 h-[var(--header-height)] flex-shrink-0 border-b border-gray-300 bg-gray-100">
+                    <div>
+                      <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        Design Review
+                      </h1>
+                      <p className="text-xs text-gray-600">
+                        Room: <span className="font-mono font-semibold">{roomId}</span>
+                        {selectedVersion && (
+                          <>
+                            {' | '}
+                            <span className="text-blue-600 font-semibold">
+                              Viewing: {selectedVersion.userName}'s design
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </div>
                     <button
+                      type="button"
                       onClick={handleViewFinalDesign}
-                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-colors font-medium shadow-md flex items-center gap-2"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-bolt-elements-button-primary-background hover:bg-bolt-elements-button-primary-backgroundHover text-bolt-elements-button-primary-text"
                     >
                       <span>View Final Design</span>
+                      <span aria-hidden>→</span>
                     </button>
-                    <button
-                      onClick={handleNavigateToWorkflow}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md"
-                    >
-                      Workflow
-                    </button>
-                  </div>
-                </div>
+                  </header>
 
-                {/* Sidebar - positioned on left when version selected */}
-                <div className="flex-1 overflow-hidden relative">
-                  <div className="w-96 min-w-96 flex-shrink-0 border-r border-gray-300 overflow-hidden bg-white h-full relative">
-                    <CodeReviewSidebar
-                      finalVersions={finalVersions}
-                      votes={votes}
-                      currentUserId={userId}
-                      selectedVersionId={selectedVersion?.id || null}
-                      roomId={roomId}
-                      onVote={handleVote}
-                      onViewCode={handleViewCode}
-                      loading={loading || loadingVotes}
-                    />
+                  {/* Content area - sidebar on left (33%), workbench on right (66%) */}
+                  <div className="flex-1 min-h-0 flex overflow-hidden">
+                    {/* Sidebar - same width as chat in design page */}
+                    <div className="w-[33.333%] min-w-0 flex-shrink-0 border-r border-gray-300 overflow-hidden bg-white h-full relative">
+                      <CodeReviewSidebar
+                        finalVersions={finalVersions}
+                        votes={votes}
+                        currentUserId={userId}
+                        selectedVersionId={selectedVersion?.id || null}
+                        roomId={roomId}
+                        onVote={handleVote}
+                        onViewCode={handleViewCode}
+                        loading={loading || loadingVotes}
+                      />
 
-                    {/* Loading overlay inside sidebar */}
-                    {loadingFiles && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 flex flex-col items-center gap-3 min-w-[300px]">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600" />
-                          <p className="text-gray-800 text-center font-semibold">{loadingMessage}</p>
-                          {loadingMessage.includes('Installing') && (
-                            <p className="text-gray-600 text-xs text-center">
-                              This may take a few moments...
-                            </p>
-                          )}
+                      {/* Loading overlay inside sidebar */}
+                      {loadingFiles && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+                          <div className="bg-white rounded-lg p-6 flex flex-col items-center gap-3 min-w-[200px]">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600" />
+                            <p className="text-gray-800 text-center font-semibold text-sm">{loadingMessage}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Workbench at root level - controlled by workbenchStore */}
-              <ClientOnly>
-                {() => <Workbench chatStarted={true} isStreaming={false} />}
-              </ClientOnly>
-            </MeetingAuthProvider>
-          </VideoTileStrip>
-        </div>
+                {/* Workbench at root level - controlled by workbenchStore */}
+                <ClientOnly>
+                  {() => <Workbench chatStarted={true} isStreaming={false} />}
+                </ClientOnly>
+              </MeetingAuthProvider>
+            </VideoTileStrip>
+          </div>
 
-        {/* Toast notifications */}
-        <ToastContainer
-          position="bottom-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
+          {/* Toast notifications */}
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </RouteGuard>
       )}
     </ClientOnly>

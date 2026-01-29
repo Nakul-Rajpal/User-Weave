@@ -1,0 +1,116 @@
+/**
+ * Design page: force light theme with hardcoded hex values.
+ * No theme() or var() from root — guarantees readable chat/AI responses
+ * even when global theme or data-theme is dark.
+ */
+
+/* When design page is active, force html/body to light so entire viewport is light */
+html[data-design-page='true'],
+html[data-design-page='true'] body {
+  background-color: #ffffff !important;
+}
+
+[data-meeting-design-mode='true'] {
+  /* Layout (keep from variables) */
+  --chat-min-width: 33.333%;
+  --workbench-width: 66.667%;
+  --workbench-left: 33.333%;
+  --workbench-inner-width: 66.667%;
+  --workbench-top: calc(6rem + var(--header-height, 54px) + 0.5rem);
+
+  /* Light theme — hardcoded hex only */
+  --bolt-elements-borderColor: rgba(0, 0, 0, 0.06);
+  --bolt-elements-borderColorActive: #8a5fff;
+  --bolt-elements-bg-depth-1: #ffffff;
+  --bolt-elements-bg-depth-2: #ffffff;
+  --bolt-elements-bg-depth-3: #f5f5f5;
+  --bolt-elements-bg-depth-4: rgba(0, 0, 0, 0.02);
+  --bolt-elements-textPrimary: #0a0a0a;
+  --bolt-elements-textSecondary: #525252;
+  --bolt-elements-textTertiary: #737373;
+  --bolt-elements-code-background: #f5f5f5;
+  --bolt-elements-code-text: #0a0a0a;
+  --bolt-elements-button-primary-background: rgba(156, 125, 255, 0.1);
+  --bolt-elements-button-primary-backgroundHover: rgba(156, 125, 255, 0.2);
+  --bolt-elements-button-primary-text: #9c7dff;
+  --bolt-elements-button-secondary-background: rgba(0, 0, 0, 0.02);
+  --bolt-elements-button-secondary-backgroundHover: rgba(0, 0, 0, 0.04);
+  --bolt-elements-button-secondary-text: #0a0a0a;
+  --bolt-elements-item-contentDefault: rgba(0, 0, 0, 0.5);
+  --bolt-elements-item-contentActive: #0a0a0a;
+  --bolt-elements-item-contentAccent: #7645e8;
+  --bolt-elements-item-backgroundActive: rgba(0, 0, 0, 0.02);
+  --bolt-elements-item-backgroundAccent: rgba(156, 125, 255, 0.1);
+  --bolt-elements-artifacts-background: #ffffff;
+  --bolt-elements-artifacts-backgroundHover: rgba(0, 0, 0, 0.04);
+  --bolt-elements-actions-background: #ffffff;
+  --bolt-elements-messages-background: #ffffff;
+  --bolt-elements-messages-linkColor: #9c7dff;
+  --bolt-elements-messages-code-background: #262626;
+  --bolt-elements-messages-inlineCode-background: #e5e5e5;
+  --bolt-elements-messages-inlineCode-text: #262626;
+  --bolt-elements-dividerColor: #f5f5f5;
+  --bolt-elements-prompt-background: rgba(255, 255, 255, 0.8);
+  --bolt-elements-terminals-background: #ffffff;
+  --bolt-elements-terminals-buttonBackground: rgba(0, 0, 0, 0.02);
+  --bolt-elements-sidebar-buttonBackgroundDefault: rgba(156, 125, 255, 0.1);
+  --bolt-elements-sidebar-buttonBackgroundHover: rgba(156, 125, 255, 0.2);
+  --bolt-elements-sidebar-buttonText: #7645e8;
+  --bolt-elements-preview-addressBar-background: #f5f5f5;
+  --bolt-elements-preview-addressBar-backgroundHover: rgba(0, 0, 0, 0.02);
+  --bolt-elements-preview-addressBar-backgroundActive: #ffffff;
+  --bolt-elements-icon-success: #22c55e;
+  --bolt-elements-icon-error: #f87171;
+  --bolt-elements-icon-primary: #0a0a0a;
+  --bolt-elements-icon-secondary: #525252;
+  --bolt-elements-icon-tertiary: #737373;
+  --modern-scrollbar-thumb-background: rgba(100, 100, 100, 0.3);
+  --modern-scrollbar-thumb-backgroundHover: rgba(74, 74, 74, 0.8);
+}
+
+/* Direct overrides for chat/message content — no var() so they always win */
+[data-meeting-design-mode='true'] .MarkdownContent,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] {
+  color: #0a0a0a !important;
+}
+
+[data-meeting-design-mode='true'] .MarkdownContent h1,
+[data-meeting-design-mode='true'] .MarkdownContent h2,
+[data-meeting-design-mode='true'] .MarkdownContent h3,
+[data-meeting-design-mode='true'] .MarkdownContent h4,
+[data-meeting-design-mode='true'] .MarkdownContent h5,
+[data-meeting-design-mode='true'] .MarkdownContent h6,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h1,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h2,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h3,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h4,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h5,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] h6 {
+  color: #0a0a0a !important;
+}
+
+[data-meeting-design-mode='true'] .MarkdownContent p,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] p {
+  color: #0a0a0a !important;
+}
+
+[data-meeting-design-mode='true'] .MarkdownContent :not(pre) > code,
+[data-meeting-design-mode='true'] [class*='MarkdownContent'] :not(pre) > code {
+  background-color: #e5e5e5 !important;
+  color: #262626 !important;
+}
+
+[data-meeting-design-mode='true'] pre,
+[data-meeting-design-mode='true'] pre code {
+  background-color: #262626 !important;
+  color: #f5f5f5 !important;
+}
+
+/* Chat column and message area backgrounds */
+[data-meeting-design-mode='true'] [class*='Chat'] {
+  background-color: #ffffff !important;
+}
+
+[data-meeting-design-mode='true'] [class*='Messages'] {
+  background-color: #ffffff !important;
+}

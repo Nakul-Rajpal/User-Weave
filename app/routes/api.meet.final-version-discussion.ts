@@ -106,24 +106,15 @@ async function handleCreate(
     throw new Error(`Failed to create discussion: ${insertError.message}`);
   }
 
-  // Fetch the complete discussion with user info from the view
-  const { data: discussionWithUser, error: viewError } = await supabase
-    .from('final_version_discussions_with_users')
-    .select('*')
+  // Fetch discussion with user info (table + join; avoids view permission issues)
+  const { data: row, error: fetchError } = await supabase
+    .from('final_version_discussions')
+    .select('*, users ( email )')
     .eq('id', discussion.id)
     .single();
 
-  if (viewError) {
-    console.error('[API] Error fetching discussion with user info:', viewError);
-    // Fallback to discussion without user info
-    console.log('[API] Discussion created successfully (without user info):', {
-      id: discussion.id,
-      versionId: finalVersionId,
-      roomId,
-      userId: user.id,
-      parentId: parentId || 'none',
-    });
-
+  if (fetchError || !row) {
+    console.log('[API] Discussion created (fetch with user info failed):', { id: discussion.id });
     return json({
       success: true,
       discussion: {
@@ -135,14 +126,15 @@ async function handleCreate(
     }, { headers });
   }
 
-  console.log('[API] Discussion created successfully:', {
-    id: discussionWithUser.id,
-    versionId: finalVersionId,
-    roomId,
-    userId: user.id,
-    parentId: parentId || 'none',
-    userName: discussionWithUser.user_name,
-  });
+  const userRow = Array.isArray(row.users) ? row.users[0] : row.users;
+  const email = userRow?.email ?? null;
+  const discussionWithUser = {
+    ...row,
+    users: undefined,
+    user_email: email,
+    user_name: email ? email.split('@')[0] : 'Unknown',
+    user_avatar: null,
+  };
 
   return json({
     success: true,
@@ -217,18 +209,14 @@ async function handleUpdate(
     throw new Error(`Failed to update discussion: ${updateError.message}`);
   }
 
-  // Fetch the complete discussion with user info from the view
-  const { data: discussionWithUser, error: viewError } = await supabase
-    .from('final_version_discussions_with_users')
-    .select('*')
+  // Fetch discussion with user info (table + join; avoids view permission issues)
+  const { data: row, error: fetchError } = await supabase
+    .from('final_version_discussions')
+    .select('*, users ( email )')
     .eq('id', id)
     .single();
 
-  if (viewError) {
-    console.error('[API] Error fetching discussion with user info:', viewError);
-    // Fallback to discussion without user info
-    console.log('[API] Discussion updated successfully (without user info):', { id, userId: user.id });
-
+  if (fetchError || !row) {
     return json({
       success: true,
       discussion: {
@@ -240,11 +228,15 @@ async function handleUpdate(
     }, { headers });
   }
 
-  console.log('[API] Discussion updated successfully:', {
-    id,
-    userId: user.id,
-    userName: discussionWithUser.user_name
-  });
+  const userRow = Array.isArray(row.users) ? row.users[0] : row.users;
+  const email = userRow?.email ?? null;
+  const discussionWithUser = {
+    ...row,
+    users: undefined,
+    user_email: email,
+    user_name: email ? email.split('@')[0] : 'Unknown',
+    user_avatar: null,
+  };
 
   return json({
     success: true,

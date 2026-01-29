@@ -132,18 +132,41 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
     console.log(`[DISCUSSIONS API] [${requestId}] ✅ Params validated`);
 
-    // Fetch all discussions with user information using the view
-    // Note: We skip final_versions verification to avoid RLS issues
-    // If the version doesn't exist, the discussions query will simply return empty results
-    console.log(`[DISCUSSIONS API] [${requestId}] Step 3: Querying discussions directly...`);
-    console.log(`[DISCUSSIONS API] [${requestId}] 🔍 Query: SELECT * FROM final_version_discussions_with_users WHERE final_version_id = '${versionId}' AND room_id = '${roomId}'`);
+    // Fetch discussions from table + join users (avoids view permission issues)
+    console.log(`[DISCUSSIONS API] [${requestId}] Step 3: Querying discussions with user join...`);
 
-    const { data: discussions, error } = await supabase
-      .from('final_version_discussions_with_users')
-      .select('*')
+    const { data: rawRows, error } = await supabase
+      .from('final_version_discussions')
+      .select(`
+        *,
+        users (
+          email
+        )
+      `)
       .eq('final_version_id', versionId)
       .eq('room_id', roomId)
-      .order('created_at', { ascending: true }); // Fetch in chronological order
+      .order('created_at', { ascending: true });
+
+    // Map to FinalVersionDiscussionWithUser shape (same as view; Supabase returns nested relation as array)
+    const discussions: FinalVersionDiscussionWithUser[] = (rawRows || []).map((row: any) => {
+      const userRow = Array.isArray(row.users) ? row.users[0] : row.users;
+      const email = userRow?.email ?? null;
+      const user_name = email ? email.split('@')[0] : 'Unknown';
+      return {
+        id: row.id,
+        final_version_id: row.final_version_id,
+        room_id: row.room_id,
+        user_id: row.user_id,
+        parent_id: row.parent_id,
+        message_text: row.message_text,
+        is_edited: row.is_edited,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        user_email: email,
+        user_name,
+        user_avatar: null,
+      };
+    });
 
     console.log(`[DISCUSSIONS API] [${requestId}] 📊 Discussions query result:`, {
       hasData: !!discussions,
@@ -165,7 +188,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     if (discussions && discussions.length > 0) {
       console.log(`[DISCUSSIONS API] [${requestId}] 📝 Sample discussion:`, {
         id: discussions[0].id,
-        message: discussions[0].message?.substring(0, 50) + '...',
+        message_text: discussions[0].message_text?.substring(0, 50) + '...',
         user_email: discussions[0].user_email,
         created_at: discussions[0].created_at,
       });

@@ -210,13 +210,13 @@ async function handleUpdate(
   }
 
   // Fetch discussion with user info (table + join; avoids view permission issues)
-  const { data: row, error: fetchError } = await supabase
+  const { data: row, error: joinError } = await supabase
     .from('final_version_discussions')
     .select('*, users ( email )')
     .eq('id', id)
     .single();
 
-  if (fetchError || !row) {
+  if (joinError || !row) {
     return json({
       success: true,
       discussion: {

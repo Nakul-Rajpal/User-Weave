@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
@@ -51,12 +51,15 @@ const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
 
   function setTutorialKitTheme() {
-    let theme = localStorage.getItem('bolt_theme');
-
+    var path = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (path.indexOf('/design') !== -1) {
+      document.querySelector('html')?.setAttribute('data-theme', 'light');
+      return;
+    }
+    var theme = localStorage.getItem('bolt_theme');
     if (!theme) {
       theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-
     document.querySelector('html')?.setAttribute('data-theme', theme);
   }
 `;
@@ -73,10 +76,15 @@ export const Head = createHead(() => (
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
+  const location = useLocation();
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
+    const html = document.querySelector('html');
+    if (!html) return;
+    // Design page always uses light theme so chat/AI responses are readable
+    const isDesignPage = location.pathname.includes('/design');
+    html.setAttribute('data-theme', isDesignPage ? 'light' : theme);
+  }, [theme, location.pathname]);
 
   return (
     <>

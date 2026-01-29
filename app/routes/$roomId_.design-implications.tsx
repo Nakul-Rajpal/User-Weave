@@ -29,24 +29,17 @@ export default function DesignImplicationsPage() {
 
   const { initializeWorkflow, cleanup, isHost, navigateToNode } = useWorkflowStore();
 
-  // Set username from authenticated user
   useEffect(() => {
     if (user?.email) {
-      const displayName = user.email.split('@')[0];
-      console.log('[DESIGN-IMPLICATIONS] Using authenticated user:', {
-        userId: user.id,
-        email: user.email,
-        displayName,
-      });
       setUserId(user.id);
-      setUsername(displayName);
+      setUsername(user.email.split('@')[0]);
     }
   }, [user]);
 
   // Show auth modal if not authenticated
   if (!authLoading && !user) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
+      <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-bg-depth-1">
         <div className="max-w-md w-full p-8">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">
@@ -62,73 +55,31 @@ export default function DesignImplicationsPage() {
     );
   }
 
-  // Initialize workflow after auth is ready
   useEffect(() => {
     if (!roomId) {
       navigate('/');
       return;
     }
-
-    if (!authReady || !userId) {
-      console.log('[DESIGN-IMPLICATIONS] Waiting for auth...', { authReady, hasUserId: !!userId });
-      return;
-    }
-
-    console.log('[DESIGN-IMPLICATIONS] Initializing workflow state...');
+    if (!authReady || !userId) return;
     initializeWorkflow(roomId, userId);
-
-    // Cleanup on unmount
-    return () => {
-      console.log('[DESIGN-IMPLICATIONS] Cleaning up workflow state...');
-      cleanup();
-    };
+    return () => cleanup();
   }, [roomId, userId, authReady, initializeWorkflow, cleanup, navigate]);
 
-  // Fetch LiveKit token after auth is ready
   useEffect(() => {
-    console.log('[DESIGN-IMPLICATIONS] Token fetch effect triggered:', { roomId, authReady, username });
-
-    if (!roomId) {
-      console.log('[DESIGN-IMPLICATIONS] No room ID');
-      return;
-    }
-
-    // Don't fetch token until auth is ready
-    if (!authReady || !username) {
-      console.log('[DESIGN-IMPLICATIONS] Waiting for auth...', { authReady, hasUsername: !!username });
-      return;
-    }
+    if (!roomId || !authReady || !username) return;
 
     const fetchToken = async () => {
       try {
-        console.log('[DESIGN-IMPLICATIONS] Fetching LiveKit token for:', { roomId, username });
-
-        const resp = await fetch(
-          `/api/meet/token?room=${roomId}&username=${username}`
-        );
-
-        console.log('[DESIGN-IMPLICATIONS] Token response status:', resp.status);
-
-        if (!resp.ok) {
-          throw new Error('Failed to get token');
-        }
-
+        const resp = await fetch(`/api/meet/token?room=${roomId}&username=${username}`);
+        if (!resp.ok) throw new Error('Failed to get token');
         const data = await resp.json() as { token?: string; url?: string; error?: string };
-        console.log('[DESIGN-IMPLICATIONS] Token data received:', { hasToken: !!data.token, hasUrl: !!data.url, error: data.error });
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
+        if (data.error) throw new Error(data.error);
         setToken(data.token || '');
         setServerUrl(data.url || '');
-        console.log('[DESIGN-IMPLICATIONS] Token and server URL set successfully');
       } catch (e) {
-        console.error('[DESIGN-IMPLICATIONS] Token fetch error:', e);
         setError(e instanceof Error ? e.message : 'Failed to connect to video');
       }
     };
-
     fetchToken();
   }, [roomId, authReady, username]);
 
@@ -180,7 +131,7 @@ export default function DesignImplicationsPage() {
     <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="design-implications" roomId={roomId}>
-          <div className="h-screen flex flex-col overflow-hidden bg-white">
+          <div className="h-screen flex flex-col overflow-hidden bg-bolt-elements-bg-depth-1">
             <VideoTileStrip
               token={token}
               serverUrl={serverUrl}
@@ -188,60 +139,62 @@ export default function DesignImplicationsPage() {
             >
               <MeetingAuthProvider>
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+                  {/* Header - glass */}
+                  <div className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-white/10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm">
                     <div>
-                      <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="text-3xl">💡</span>
+                      <h1 className="text-2xl font-bold text-bolt-elements-textPrimary flex items-center gap-2">
+                        <span className="text-3xl" aria-hidden>💡</span>
                         Design Implications
                       </h1>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-bolt-elements-textSecondary mt-0.5">
                         Room: <span className="font-mono font-semibold">{roomId}</span> | User:{' '}
                         <span className="font-semibold">{username}</span>
                       </p>
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <p className="text-sm text-bolt-elements-textTertiary max-w-xs text-right">
                       AI-generated implications from your meeting transcript
-                    </div>
+                    </p>
                   </div>
 
-                  {/* Instructions Banner */}
-                  <div className="bg-blue-50 border-b border-blue-200 px-6 py-3 flex-shrink-0">
-                    <p className="text-sm text-blue-800">
+                  {/* Instructions Banner - accent glass */}
+                  <div className="px-6 py-3 flex-shrink-0 border-b border-accent-500/20 bg-accent-500/10 backdrop-blur-sm">
+                    <p className="text-sm text-bolt-elements-textPrimary">
                       <strong>All participants</strong> can edit, add, or remove design implications below.
                       Once everyone is satisfied, proceed to the design stage.
                     </p>
                   </div>
 
-                  {/* Main Content - Design Implications Panel with Edit Access for Everyone */}
+                  {/* Main Content */}
                   <div className="flex-1 min-h-0 overflow-hidden">
-                    <ClientOnly fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                    <ClientOnly fallback={<div className="flex items-center justify-center h-64 text-bolt-elements-textSecondary">Loading...</div>}>
                       {() => (
                         <DesignImplicationsPanel roomId={roomId} readOnly={false} />
                       )}
                     </ClientOnly>
                   </div>
 
-                  {/* Navigation Footer */}
-                  <div className="bg-white border-t border-gray-200 px-6 py-4 flex-shrink-0">
-                    <div className="flex items-center justify-between">
+                  {/* Navigation Footer - glass + gradient CTAs */}
+                  <div className="px-6 py-4 flex-shrink-0 border-t border-white/10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)]">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
                       <button
+                        type="button"
                         onClick={handleBackToMeeting}
-                        className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl font-medium bg-bolt-elements-bg-depth-3 text-bolt-elements-textPrimary border border-bolt-elements-borderColor hover:bg-bolt-elements-bg-depth-4 hover:border-accent-500/30 transition-all duration-200"
                       >
-                        <span>Back to Meeting</span>
+                        <span>← Back to Meeting</span>
                       </button>
 
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-bolt-elements-textTertiary text-center order-last w-full sm:order-none sm:w-auto">
                         Use the <span className="font-semibold">Workflow</span> button in the video bar for full navigation
                       </p>
 
                       <button
+                        type="button"
                         onClick={handleContinueToDesign}
-                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-colors font-medium flex items-center gap-2 shadow-md hover:shadow-lg"
+                        className="px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:from-green-500 hover:to-emerald-400 transition-all duration-300 flex items-center gap-2"
                       >
                         <span>Continue to Design</span>
-                        <span>-&gt;</span>
+                        <span aria-hidden>→</span>
                       </button>
                     </div>
                   </div>

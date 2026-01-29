@@ -23,18 +23,8 @@ interface Props {
 export default function VideoTileStrip({ token, serverUrl, roomName, children }: Props) {
   const navigate = useNavigate();
 
-  console.log('📹 [VIDEO_STRIP] Rendering with:', {
-    hasToken: !!token,
-    serverUrl,
-    roomName,
-    tokenLength: token?.length,
-    hasChildren: !!children,
-  });
-
-  // In design mode we want a fully white page background, so use bg-white here.
-  // The video tiles themselves still manage their own darker backgrounds.
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-bolt-elements-bg-depth-1">
       <LiveKitRoom
         video={true}
         audio={true}
@@ -42,14 +32,10 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
         serverUrl={serverUrl}
         data-lk-theme="default"
         className="flex flex-col min-h-screen"
-        onConnected={() => console.log('✅ [VIDEO_STRIP] Connected to LiveKit room:', roomName)}
-        onDisconnected={() => {
-          console.log('🔌 [VIDEO_STRIP] Disconnected from room');
-          navigate('/');
-        }}
+        onDisconnected={() => navigate('/')}
       >
         {/* Video tiles strip at top */}
-        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-white flex-shrink-0`}>
+        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-bolt-elements-bg-depth-1 flex-shrink-0`}>
           <div className={styles.stripContent}>
             <div className={styles.tilesContainer}>
               <VideoTiles />

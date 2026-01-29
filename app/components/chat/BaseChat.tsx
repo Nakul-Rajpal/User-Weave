@@ -14,8 +14,6 @@ import { getApiKeysFromCookies } from './APIKeyManager';
 import Cookies from 'js-cookie';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import styles from './BaseChat.module.scss';
-// import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
-// import GitCloneButton from './GitCloneButton';
 import type { ProviderInfo } from '~/types/model';
 import type { ActionAlert, DeployAlert, LlmErrorAlertType } from '~/types/actions';
 import DeployChatAlert from '~/components/deploy/DeployAlert';
@@ -144,9 +142,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setProgressAnnotations(progressList);
       }
     }, [data]);
-    useEffect(() => {
-      console.log(transcript);
-    }, [transcript]);
 
     useEffect(() => {
       onStreamingChange?.(isStreaming);
@@ -381,9 +376,9 @@ Create a full working implementation with all necessary files and best practices
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div className="flex flex-col lg:flex-row w-full h-full">
-          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full bg-white')}>
+          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full bg-bolt-elements-bg-depth-1')}>
             {/* Scrollable messages area */}
-            <div className="flex-1 min-h-0 overflow-y-auto modern-scrollbar bg-white">
+            <div className="flex-1 min-h-0 overflow-y-auto modern-scrollbar bg-bolt-elements-bg-depth-1">
               {!chatStarted && (
                 <div id="intro" className="mt-[16vh] max-w-2xl mx-auto text-center px-4 lg:px-0">
                   <h1 className="text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
@@ -431,7 +426,7 @@ Create a full working implementation with all necessary files and best practices
             </div>
 
             {/* Fixed input area at bottom */}
-            <div className="flex-shrink-0 px-2 sm:px-6 pb-4 pt-2 bg-white border-t border-gray-200">
+            <div className="flex-shrink-0 px-2 sm:px-6 pb-4 pt-2 bg-bolt-elements-bg-depth-1 border-t border-bolt-elements-borderColor">
               <div className="flex flex-col gap-2 w-full max-w-chat mx-auto z-prompt">
                 <div className="flex flex-col gap-2">
                   {deployAlert && (

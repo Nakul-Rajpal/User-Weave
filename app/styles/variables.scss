@@ -106,8 +106,7 @@
   --modern-scrollbar-thumb-backgroundHover: rgba(74, 74, 74, 0.8);
 }
 
-/* Color Tokens Dark Theme */
-:root,
+/* Color Tokens Dark Theme - only when explicitly dark (so default/light wins) */
 :root[data-theme='dark'] {
   --bolt-elements-borderColor: theme('colors.alpha.white.10');
   --bolt-elements-borderColorActive: theme('colors.accent.500');
@@ -221,6 +220,7 @@
  */
 :root {
   --header-height: 54px;
+  --workbench-top: calc(var(--header-height) + 1.2rem);
   --chat-max-width: 33rem;
   --chat-min-width: 533px;
   --workbench-width: min(calc(100% - var(--chat-min-width)), 2536px);
@@ -254,8 +254,14 @@
   --bolt-elements-terminal-color-brightWhite: var(--bolt-terminal-brightWhite);
 }
 
-/* Meeting Design Mode - Light Theme Override */
+/* Meeting Design Mode - Light Theme + Layout (1/3 chat, 2/3 workbench) */
 [data-meeting-design-mode='true'] {
+  --chat-min-width: 33.333%;
+  --workbench-width: 66.667%;
+  --workbench-left: 33.333%;
+  --workbench-inner-width: 66.667%;
+  /* Workbench below video strip (6rem) + design header */
+  --workbench-top: calc(6rem + var(--header-height) + 0.5rem);
   --bolt-elements-borderColor: theme('colors.alpha.gray.10');
   --bolt-elements-borderColorActive: theme('colors.accent.600');
   --bolt-elements-bg-depth-1: theme('colors.white');       /* page background */
@@ -282,7 +288,11 @@
   --bolt-elements-artifacts-background: theme('colors.white');
   --bolt-elements-artifacts-backgroundHover: theme('colors.alpha.gray.2');
   --bolt-elements-actions-background: theme('colors.white');
-  --bolt-elements-messages-background: theme('colors.white'); /* chat background fully white */
+  --bolt-elements-messages-background: theme('colors.white');
+  --bolt-elements-messages-linkColor: theme('colors.accent.500');
+  --bolt-elements-messages-code-background: theme('colors.gray.800');
+  --bolt-elements-messages-inlineCode-background: theme('colors.gray.200');
+  --bolt-elements-messages-inlineCode-text: theme('colors.gray.800');
   --bolt-elements-dividerColor: theme('colors.gray.100');
   --bolt-elements-prompt-background: theme('colors.alpha.white.80');
   --bolt-elements-terminals-background: theme('colors.white');

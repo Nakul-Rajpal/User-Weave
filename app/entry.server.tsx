@@ -17,6 +17,9 @@ export default async function handleRequest(
   _loadContext: AppLoadContext,
 ) {
   const prohibitOutOfOrderStreaming = isbot(request.headers.get('user-agent') || '');
+  const url = new URL(request.url);
+  const isDesignPage = url.pathname.endsWith('/design');
+  const initialTheme = isDesignPage ? 'light' : themeStore.value;
 
   return new Promise((resolve, reject) => {
     let shellRendered = false;
@@ -41,9 +44,9 @@ export default async function handleRequest(
             }),
           );
 
-          // Write the HTML shell
+          // Write the HTML shell (design page always gets light theme for consistent appearance on Render)
           body.write(
-            `<!DOCTYPE html><html lang="en" data-theme="${themeStore.value}"><head>${head}</head><body><div id="root" class="w-full h-full">`,
+            `<!DOCTYPE html><html lang="en" data-theme="${initialTheme}"><head>${head}</head><body><div id="root" class="w-full h-full">`,
           );
 
           pipe(body);

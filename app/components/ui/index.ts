@@ -27,6 +27,7 @@ export * from './EmptyState';
 export * from './FileIcon';
 export * from './FilterChip';
 export * from './GradientCard';
+export * from './ImmersiveBackground';
 export * from './RepositoryStats';
 export * from './SearchInput';
 export * from './SearchResultItem';

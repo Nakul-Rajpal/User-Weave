@@ -67,17 +67,14 @@ export async function generateDesignImplications(
   if (typeof process !== 'undefined' && process.env) {
     const envKeys = Object.keys(process.env).filter(key =>
       key.includes('OPENAI') ||
-      key.includes('ANTHROPIC') ||
       key.includes('SUPABASE') ||
       key.includes('VITE_')
     );
     debugInfo.processEnvKeys = envKeys;
     debugInfo.openaiKeyInProcessEnv = !!process.env.OPENAI_API_KEY;
-    debugInfo.anthropicKeyInProcessEnv = !!process.env.ANTHROPIC_API_KEY;
 
     console.log('🔍 DEBUG - Relevant process.env keys:', envKeys);
     console.log('🔍 DEBUG - OPENAI_API_KEY in process.env:', !!process.env.OPENAI_API_KEY);
-    console.log('🔍 DEBUG - ANTHROPIC_API_KEY in process.env:', !!process.env.ANTHROPIC_API_KEY);
   }
 
   // Merge environment variables from all sources
@@ -87,7 +84,6 @@ export async function generateDesignImplications(
   const serverEnv: Record<string, string | undefined> = {
     ...context?.env,      // Vercel production (if available)
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     SUPABASE_URL: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -95,17 +91,14 @@ export async function generateDesignImplications(
 
   const mergedEnvKeys = Object.keys(serverEnv).filter(key =>
     key.includes('OPENAI') ||
-    key.includes('ANTHROPIC') ||
     key.includes('SUPABASE') ||
     key.includes('VITE_')
   );
   debugInfo.mergedServerEnvKeys = mergedEnvKeys;
   debugInfo.openaiKeyInServerEnv = !!serverEnv.OPENAI_API_KEY;
-  debugInfo.anthropicKeyInServerEnv = !!serverEnv.ANTHROPIC_API_KEY;
 
   console.log('🔍 DEBUG - Merged serverEnv keys:', mergedEnvKeys);
   console.log('🔍 DEBUG - OPENAI_API_KEY in serverEnv:', !!serverEnv.OPENAI_API_KEY);
-  console.log('🔍 DEBUG - ANTHROPIC_API_KEY in serverEnv:', !!serverEnv.ANTHROPIC_API_KEY);
   // ========== END DEBUG ==========
 
   // Fetch the most recent transcript for this room
@@ -180,7 +173,7 @@ Return ONLY the JSON array, no additional text.`;
 
   // Don't pass providerSettings if we have server-side API keys
   // This prevents cookie-based provider settings from filtering out available providers
-  const hasServerKeys = !!serverEnv?.OPENAI_API_KEY || !!serverEnv?.ANTHROPIC_API_KEY;
+  const hasServerKeys = !!serverEnv?.OPENAI_API_KEY;
   const effectiveProviderSettings = hasServerKeys ? undefined : providerSettings;
 
   await llmManager.updateModelList({ apiKeys, providerSettings: effectiveProviderSettings, serverEnv: serverEnv as any });
@@ -203,17 +196,11 @@ Return ONLY the JSON array, no additional text.`;
 
   console.log('🔍 DEBUG - Models by provider:', JSON.stringify(modelsByProvider, null, 2));
 
-  // Check which providers have valid API keys
-  const hasAnthropicKey = apiKeys?.['Anthropic'] ||
-                         serverEnv?.ANTHROPIC_API_KEY;
-
+  // Check if OpenAI API key is available
   const hasOpenAIKey = apiKeys?.['OpenAI'] ||
                       serverEnv?.OPENAI_API_KEY;
 
   debugInfo.apiKeyDetection = {
-    anthropicFromCookies: !!apiKeys?.['Anthropic'],
-    anthropicFromServerEnv: !!serverEnv?.ANTHROPIC_API_KEY,
-    anthropicFinal: !!hasAnthropicKey,
     openaiFromCookies: !!apiKeys?.['OpenAI'],
     openaiFromServerEnv: !!serverEnv?.OPENAI_API_KEY,
     openaiFinal: !!hasOpenAIKey
@@ -225,11 +212,9 @@ Return ONLY the JSON array, no additional text.`;
   console.log('🔍 DEBUG - Starting model selection...');
   // ========== END DEBUG ==========
 
-  // Select model based on available API keys
-  // Priority: OpenAI first (for transcription consistency), then Anthropic as fallback
+  // Select OpenAI model
   let preferredModel;
 
-  // Try OpenAI first if API key exists
   if (hasOpenAIKey) {
     console.log('🔍 DEBUG - Attempting to select OpenAI model...');
     const openaiModels = models.filter(m => m.provider === 'OpenAI');
@@ -244,42 +229,19 @@ Return ONLY the JSON array, no additional text.`;
     );
 
     if (preferredModel) {
-      console.log('✅ Using OpenAI model (OpenAI API key available):', preferredModel.name);
+      console.log('✅ Using OpenAI model:', preferredModel.name);
     } else {
       console.log('⚠️  DEBUG - No suitable OpenAI model found in available models');
     }
   } else {
-    console.log('🔍 DEBUG - Skipping OpenAI (no API key)');
-  }
-
-  // Fallback to Anthropic (Claude) if OpenAI not found or no key
-  if (!preferredModel && hasAnthropicKey) {
-    console.log('🔍 DEBUG - Attempting to select Anthropic model...');
-    const anthropicModels = models.filter(m => m.provider === 'Anthropic');
-    console.log('🔍 DEBUG - Available Anthropic models:', anthropicModels.map(m => m.name));
-
-    preferredModel = models.find(m =>
-      m.provider === 'Anthropic' && (
-        m.name.includes('claude-3-5-sonnet') ||
-        m.name.includes('claude-3-sonnet')
-      )
-    );
-
-    if (preferredModel) {
-      console.log('✅ Using Claude model (OpenAI unavailable, using Anthropic fallback):', preferredModel.name);
-    } else {
-      console.log('⚠️  DEBUG - No suitable Claude model found in available models');
-    }
-  } else if (!preferredModel) {
-    console.log('🔍 DEBUG - Skipping Anthropic (no API key)');
+    console.log('🔍 DEBUG - No OpenAI API key available');
   }
 
   if (!preferredModel) {
     console.error('❌ ERROR - No suitable LLM model found!');
     console.error('❌ Available models:', models.length);
     console.error('❌ Has OpenAI key:', !!hasOpenAIKey);
-    console.error('❌ Has Anthropic key:', !!hasAnthropicKey);
-    throw new Error('No suitable LLM model found. Please configure either OpenAI (GPT-4) or Anthropic (Claude) API keys in your settings.');
+    throw new Error('No suitable LLM model found. Please configure your OpenAI API key in your settings.');
   }
 
   const providerInfo = PROVIDER_LIST.find((p) => p.name === preferredModel.provider);

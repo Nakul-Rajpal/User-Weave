@@ -130,7 +130,6 @@ export function validateApiKeyFormat(apiKey: string, provider: string): boolean 
 
   // Basic length checks for different providers
   const minLengths: Record<string, number> = {
-    anthropic: 50,
     openai: 50,
     groq: 50,
     google: 30,

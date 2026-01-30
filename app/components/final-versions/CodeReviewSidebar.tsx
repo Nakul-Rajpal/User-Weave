@@ -17,6 +17,7 @@ interface CodeReviewSidebarProps {
   roomId: string;
   onVote: (versionId: string, vote: FinalVersionVoteType, comment?: string) => Promise<void>;
   onViewCode: (version: FinalVersionWithDetails) => void;
+  onAdoptDesign?: (version: FinalVersionWithDetails) => void;
   loading?: boolean;
 }
 
@@ -28,6 +29,7 @@ export function CodeReviewSidebar({
   roomId,
   onVote,
   onViewCode,
+  onAdoptDesign,
   loading = false,
 }: CodeReviewSidebarProps) {
   const [votingVersionId, setVotingVersionId] = useState<string | null>(null);
@@ -195,8 +197,19 @@ export function CodeReviewSidebar({
                         }
                       `}
                     >
-                      {isSelected ? 'Viewing' : 'View Design'}
+                      {isSelected ? 'Viewing' : 'View'}
                     </button>
+
+                    {/* Adopt Design Button */}
+                    {onAdoptDesign && (
+                      <button
+                        onClick={() => onAdoptDesign(version)}
+                        className="px-3 py-2 rounded text-sm font-medium transition-all bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                        title="Adopt this design and continue working on it"
+                      >
+                        🔀 Adopt
+                      </button>
+                    )}
 
                     {/* Discussion Button */}
                     <button

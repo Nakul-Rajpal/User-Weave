@@ -69,7 +69,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     cookieApiKeys: Object.keys(apiKeys),
     hasCookieApiKeys: Object.keys(apiKeys).length > 0,
     envOpenAI: !!process.env.OPENAI_API_KEY,
-    envAnthropic: !!process.env.ANTHROPIC_API_KEY,
     providerSettings: Object.keys(providerSettings),
   });
 
@@ -372,7 +371,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         logger.error('API Keys available:', Object.keys(apiKeys));
         logger.error('Env keys:', {
           openai: !!process.env.OPENAI_API_KEY,
-          anthropic: !!process.env.ANTHROPIC_API_KEY,
         });
 
         // Provide more specific error messages for common issues

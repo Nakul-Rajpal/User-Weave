@@ -18,7 +18,7 @@ import VideoTileStrip from '~/components/meet/VideoTileStrip';
 import { MeetingAuthProvider } from '~/components/meet/MeetingAuthProvider';
 import { CodeReviewSidebar } from '~/components/final-versions/CodeReviewSidebar';
 import type { FinalVersionWithDetails } from '~/lib/persistence/supabase';
-import { getAllFinalVersions } from '~/lib/persistence/supabase';
+import { getAllFinalVersions, adoptFinalVersionDesign } from '~/lib/persistence/supabase';
 import { supabase } from '~/lib/supabase/client';
 import type { FinalVersionVoteType, VoteData } from '~/types/final-versions';
 import { toast, ToastContainer } from 'react-toastify';
@@ -354,6 +354,24 @@ export default function RatingPage() {
     navigate(`/${roomId}/workflow`);
   };
 
+  // Adopt a design and navigate to design page
+  const handleAdoptDesign = async (version: FinalVersionWithDetails) => {
+    try {
+      console.log('[RATING] Adopting design:', version.id, 'from', version.userName);
+      toast.info('Adopting design...');
+
+      const { url_id } = await adoptFinalVersionDesign(version, roomId);
+
+      toast.success(`Design adopted! Redirecting to editor...`);
+
+      // Navigate to design page with the new chat
+      navigate(`/${roomId}/design?chat=${url_id}`);
+    } catch (err: any) {
+      console.error('[RATING] Failed to adopt design:', err);
+      toast.error(err.message || 'Failed to adopt design');
+    }
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-white">
@@ -409,14 +427,24 @@ export default function RatingPage() {
                         )}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleViewFinalDesign}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-bolt-elements-button-primary-background hover:bg-bolt-elements-button-primary-backgroundHover text-bolt-elements-button-primary-text"
-                    >
-                      <span>View Final Design</span>
-                      <span aria-hidden>→</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleNavigateToWorkflow}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300"
+                      >
+                        <span>📊</span>
+                        <span>Workflow</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleViewFinalDesign}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-bolt-elements-button-primary-background hover:bg-bolt-elements-button-primary-backgroundHover text-bolt-elements-button-primary-text"
+                      >
+                        <span>View Final Design</span>
+                        <span aria-hidden>→</span>
+                      </button>
+                    </div>
                   </header>
 
                   {/* Content area - sidebar on left (33%), workbench on right (66%) */}
@@ -431,6 +459,7 @@ export default function RatingPage() {
                         roomId={roomId}
                         onVote={handleVote}
                         onViewCode={handleViewCode}
+                        onAdoptDesign={handleAdoptDesign}
                         loading={loading || loadingVotes}
                       />
 

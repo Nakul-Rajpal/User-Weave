@@ -1472,6 +1472,110 @@ export async function forkRoomDesignChat(
 }
 
 /**
+ * Adopt a design from a final version
+ * Creates a new chat with the files from another user's submitted design
+ * Allows users to continue working on an existing design
+ */
+export async function adoptFinalVersionDesign(
+  finalVersion: FinalVersionWithDetails,
+  roomId: string
+): Promise<{ id: string; url_id: string }> {
+  const user = await getVerifiedUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  console.log('🔄 [ADOPT] Starting design adoption:', {
+    finalVersionId: finalVersion.id,
+    originalUser: finalVersion.userName,
+    roomId,
+    userId: user.id,
+  });
+
+  // Generate new IDs
+  const newChatId = generateUUID();
+  const newUrlId = generateUUID().split('-')[0];
+
+  // Create the new chat
+  const { error: chatCreateError } = await supabase
+    .from('chats')
+    .insert({
+      id: newChatId,
+      user_id: user.id,
+      title: `Adopted from ${finalVersion.userName}'s design: ${finalVersion.chatTitle || 'Untitled'}`,
+      url_id: newUrlId,
+      metadata: {
+        type: 'adopted_design',
+        adopted_from_version: finalVersion.id,
+        adopted_from_user: finalVersion.userName,
+        room_id: roomId,
+        adopted_at: new Date().toISOString(),
+        auto_submit_first: false,
+      },
+    });
+
+  if (chatCreateError) {
+    throw new Error(`Failed to create adopted chat: ${chatCreateError.message}`);
+  }
+
+  console.log('🔄 [ADOPT] New chat created:', { newChatId, newUrlId });
+
+  // Create initial message to document the adoption
+  const adoptionMessage = {
+    id: generateUUID(),
+    chat_id: newChatId,
+    role: 'assistant',
+    content: `This design was adopted from **${finalVersion.userName}**'s submission.\n\nOriginal title: ${finalVersion.chatTitle || 'Untitled'}\n${finalVersion.notes ? `\nNotes: ${finalVersion.notes}` : ''}\n\nYou can continue editing and improving this design.`,
+    sequence: 1,
+    annotations: null,
+  };
+
+  const { error: messageError } = await supabase
+    .from('messages')
+    .insert(adoptionMessage);
+
+  if (messageError) {
+    console.warn('⚠️ [ADOPT] Failed to create adoption message:', messageError.message);
+  }
+
+  // Create snapshot with the files from the final version
+  if (finalVersion.files && Object.keys(finalVersion.files).length > 0) {
+    const { error: snapshotError } = await supabase
+      .from('snapshots')
+      .insert({
+        chat_id: newChatId,
+        message_id: adoptionMessage.id,
+        files_json: finalVersion.files,
+        summary: `Adopted from ${finalVersion.userName}'s design`,
+      });
+
+    if (snapshotError) {
+      console.warn('⚠️ [ADOPT] Failed to create snapshot:', snapshotError.message);
+    } else {
+      console.log('🔄 [ADOPT] Snapshot created with files');
+    }
+  }
+
+  // Register as a room design chat so it shows in the design page
+  const { error: roomDesignError } = await supabase
+    .from('room_design_chats')
+    .insert({
+      room_id: roomId,
+      chat_id: newChatId,
+      user_id: user.id,
+      is_master: false,
+      forked_from: finalVersion.chatId || null,
+    });
+
+  if (roomDesignError) {
+    console.warn('⚠️ [ADOPT] Failed to register room design chat:', roomDesignError.message);
+  }
+
+  console.log('✅ [ADOPT] Design adoption completed successfully');
+  return { id: newChatId, url_id: newUrlId };
+}
+
+/**
  * Subscribe to new room design chats for real-time updates
  */
 export function subscribeToRoomDesignChats(

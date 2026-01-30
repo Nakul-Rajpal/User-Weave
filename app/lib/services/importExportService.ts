@@ -254,7 +254,6 @@ export class ImportExportService {
      * This matches how the application stores API keys in cookies
      */
     const template = {
-      Anthropic: '',
       OpenAI: '',
       Google: '',
       Groq: '',

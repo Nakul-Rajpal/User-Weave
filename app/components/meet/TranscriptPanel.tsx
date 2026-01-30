@@ -69,7 +69,7 @@ const TranscriptPanel = forwardRef<TranscriptPanelHandle, { roomName: string }>(
     if (storedApiKeys) {
       try {
         const keys = JSON.parse(storedApiKeys);
-        const hasKeys = !!(keys.OpenAI || keys.Anthropic);
+        const hasKeys = !!keys.OpenAI;
         setHasAPIKeys(hasKeys);
         return hasKeys;
       } catch {
@@ -289,9 +289,7 @@ const TranscriptPanel = forwardRef<TranscriptPanelHandle, { roomName: string }>(
           console.log('Environment Variables:', {
             processEnvAvailable: data.debug.processEnvAvailable,
             openaiKeyInProcessEnv: data.debug.openaiKeyInProcessEnv,
-            anthropicKeyInProcessEnv: data.debug.anthropicKeyInProcessEnv,
             openaiKeyInServerEnv: data.debug.openaiKeyInServerEnv,
-            anthropicKeyInServerEnv: data.debug.anthropicKeyInServerEnv,
           });
           console.log('Context:', {
             contextType: data.debug.contextType,

@@ -162,3 +162,95 @@ html[data-rating-page='true'] body {
 [data-meeting-rating-mode='true'] [class*='Messages'] {
   background-color: #ffffff !important;
 }
+
+/* Workbench / Code Preview backgrounds - force light theme */
+[data-meeting-design-mode='true'] .z-workbench,
+[data-meeting-design-mode='true'] .z-workbench > div,
+[data-meeting-design-mode='true'] .z-workbench > div > div,
+[data-meeting-rating-mode='true'] .z-workbench,
+[data-meeting-rating-mode='true'] .z-workbench > div,
+[data-meeting-rating-mode='true'] .z-workbench > div > div {
+  background-color: #ffffff !important;
+}
+
+/* Workbench inner panels */
+[data-meeting-design-mode='true'] [class*='Workbench'],
+[data-meeting-rating-mode='true'] [class*='Workbench'] {
+  background-color: #ffffff !important;
+}
+
+/* Editor panel backgrounds */
+[data-meeting-design-mode='true'] [class*='EditorPanel'],
+[data-meeting-design-mode='true'] [class*='editor-panel'],
+[data-meeting-rating-mode='true'] [class*='EditorPanel'],
+[data-meeting-rating-mode='true'] [class*='editor-panel'] {
+  background-color: #ffffff !important;
+}
+
+/* Preview panel backgrounds */
+[data-meeting-design-mode='true'] [class*='Preview'],
+[data-meeting-rating-mode='true'] [class*='Preview'] {
+  background-color: #ffffff !important;
+}
+
+/* File tree / sidebar backgrounds */
+[data-meeting-design-mode='true'] [class*='FileTree'],
+[data-meeting-design-mode='true'] [class*='file-tree'],
+[data-meeting-rating-mode='true'] [class*='FileTree'],
+[data-meeting-rating-mode='true'] [class*='file-tree'] {
+  background-color: #f9fafb !important;
+}
+
+/* Terminal backgrounds - keep light but slightly different */
+[data-meeting-design-mode='true'] [class*='Terminal'],
+[data-meeting-rating-mode='true'] [class*='Terminal'] {
+  background-color: #f9fafb !important;
+}
+
+/* Panel headers and toolbars */
+[data-meeting-design-mode='true'] [class*='PanelHeader'],
+[data-meeting-design-mode='true'] [class*='panel-header'],
+[data-meeting-rating-mode='true'] [class*='PanelHeader'],
+[data-meeting-rating-mode='true'] [class*='panel-header'] {
+  background-color: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Tab bars */
+[data-meeting-design-mode='true'] [class*='TabBar'],
+[data-meeting-design-mode='true'] [class*='tab-bar'],
+[data-meeting-rating-mode='true'] [class*='TabBar'],
+[data-meeting-rating-mode='true'] [class*='tab-bar'] {
+  background-color: #f3f4f6 !important;
+}
+
+/* Generic depth backgrounds using data attributes or bolt classes */
+[data-meeting-design-mode='true'] .bg-bolt-elements-bg-depth-1,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-bg-depth-1 {
+  background-color: #ffffff !important;
+}
+
+[data-meeting-design-mode='true'] .bg-bolt-elements-bg-depth-2,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-bg-depth-2 {
+  background-color: #f9fafb !important;
+}
+
+[data-meeting-design-mode='true'] .bg-bolt-elements-bg-depth-3,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-bg-depth-3 {
+  background-color: #f3f4f6 !important;
+}
+
+[data-meeting-design-mode='true'] .bg-bolt-elements-background-depth-1,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-background-depth-1 {
+  background-color: #ffffff !important;
+}
+
+[data-meeting-design-mode='true'] .bg-bolt-elements-background-depth-2,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-background-depth-2 {
+  background-color: #f9fafb !important;
+}
+
+[data-meeting-design-mode='true'] .bg-bolt-elements-background-depth-3,
+[data-meeting-rating-mode='true'] .bg-bolt-elements-background-depth-3 {
+  background-color: #f3f4f6 !important;
+}

@@ -8,7 +8,6 @@ interface APIKeyConfigModalProps {
 
 interface APIKeys {
   OpenAI?: string;
-  Anthropic?: string;
 }
 
 function getApiKeysFromCookies(): APIKeys {
@@ -25,7 +24,6 @@ function getApiKeysFromCookies(): APIKeys {
 
 export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModalProps) {
   const [openAIKey, setOpenAIKey] = useState('');
-  const [anthropicKey, setAnthropicKey] = useState('');
   const [showKeys, setShowKeys] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -34,7 +32,6 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
     if (isOpen) {
       const savedKeys = getApiKeysFromCookies();
       setOpenAIKey(savedKeys.OpenAI || '');
-      setAnthropicKey(savedKeys.Anthropic || '');
     }
   }, [isOpen]);
 
@@ -54,26 +51,20 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
         delete newKeys.OpenAI;
       }
 
-      if (anthropicKey.trim()) {
-        newKeys.Anthropic = anthropicKey.trim();
-      } else {
-        delete newKeys.Anthropic;
-      }
-
       // Save to cookies
       Cookies.set('apiKeys', JSON.stringify(newKeys), { expires: 365 });
 
-      alert('✅ API keys saved successfully! You can now use AI summarization.');
+      alert('✅ API key saved successfully! You can now use AI summarization.');
       onClose();
     } catch (error) {
-      console.error('Failed to save API keys:', error);
-      alert('Failed to save API keys. Please try again.');
+      console.error('Failed to save API key:', error);
+      alert('Failed to save API key. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
-  const hasAtLeastOneKey = openAIKey.trim() || anthropicKey.trim();
+  const hasKey = openAIKey.trim();
 
   if (!isOpen) return null;
 
@@ -93,7 +84,7 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Configure API Keys
+              Configure API Key
             </h2>
             <button
               onClick={onClose}
@@ -106,7 +97,7 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            To use AI summarization, you need to provide at least one API key. Your keys are stored securely in your browser and sent only when generating summaries.
+            To use AI summarization, you need to provide your OpenAI API key. Your key is stored securely in your browser and sent only when generating summaries.
           </p>
 
           {/* OpenAI API Key */}
@@ -135,32 +126,6 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
             </a>
           </div>
 
-          {/* Anthropic API Key */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Anthropic API Key (Claude)
-            </label>
-            <div className="relative">
-              <input
-                type={showKeys ? 'text' : 'password'}
-                value={anthropicKey}
-                onChange={(e) => setAnthropicKey(e.target.value)}
-                placeholder="sk-ant-..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-            <a
-              href="https://console.anthropic.com/settings/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-purple-600 dark:text-purple-400 hover:underline mt-1 inline-block"
-            >
-              Get Anthropic API key →
-            </a>
-          </div>
-
           {/* Show/Hide Toggle */}
           <div className="mb-6">
             <label className="flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -170,7 +135,7 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
                 onChange={(e) => setShowKeys(e.target.checked)}
                 className="mr-2"
               />
-              Show API keys
+              Show API key
             </label>
           </div>
 
@@ -186,19 +151,19 @@ export default function APIKeyConfigModal({ isOpen, onClose }: APIKeyConfigModal
             </button>
             <button
               onClick={handleSave}
-              disabled={!hasAtLeastOneKey || saving}
+              disabled={!hasKey || saving}
               className={`flex-1 px-4 py-2 rounded-md text-white transition-colors ${
-                hasAtLeastOneKey && !saving
+                hasKey && !saving
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
             >
-              {saving ? 'Saving...' : 'Save Keys'}
+              {saving ? 'Saving...' : 'Save Key'}
             </button>
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-            💡 Tip: You only need one provider. OpenAI (GPT-4) or Anthropic (Claude) will work.
+            💡 Your OpenAI API key will be used for AI-powered features like transcript summarization.
           </p>
         </div>
       </div>

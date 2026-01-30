@@ -22,7 +22,6 @@ export default defineConfig((config) => {
       'process.env.LIVEKIT_API_KEY': JSON.stringify(process.env.LIVEKIT_API_KEY),
       'process.env.LIVEKIT_API_SECRET': JSON.stringify(process.env.LIVEKIT_API_SECRET),
       'process.env.DEEPGRAM_API_KEY': JSON.stringify(process.env.DEEPGRAM_API_KEY),
-      'process.env.ANTHROPIC_API_KEY': JSON.stringify(process.env.ANTHROPIC_API_KEY),
       'process.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY),
     },
     build: {
@@ -91,7 +90,6 @@ export default defineConfig((config) => {
       'VITE_',
       'SUPABASE_SERVICE_ROLE_KEY',
       'OPENAI_API_KEY',
-      'ANTHROPIC_API_KEY',
       'GOOGLE_GENERATIVE_AI_API_KEY',
       'TOGETHER_API_KEY',
       'OPENAI_LIKE_API_BASE_URL',

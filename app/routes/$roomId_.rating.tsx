@@ -62,8 +62,10 @@ export default function RatingPage() {
     const html = document.documentElement;
     html.setAttribute('data-theme', 'light');
     html.setAttribute('data-rating-page', 'true');
+    html.setAttribute('data-meeting-rating-mode', 'true');
     return () => {
       html.removeAttribute('data-rating-page');
+      html.removeAttribute('data-meeting-rating-mode');
       html.setAttribute('data-theme', themeStore.get());
     };
   }, []);
@@ -91,13 +93,13 @@ export default function RatingPage() {
   // Show auth modal if not authenticated
   if (!authLoading && !user) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-bolt-elements-background-depth-1">
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
         <div className="max-w-md w-full p-8">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Login Required
             </h1>
-            <p className="text-bolt-elements-textSecondary">
+            <p className="text-gray-600">
               Please sign in to access design rating
             </p>
           </div>
@@ -354,9 +356,9 @@ export default function RatingPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-red-50">
+      <div className="flex items-center justify-center h-screen bg-white">
         <div className="text-center">
-          <div className="text-4xl mb-4">Error</div>
+          <div className="text-4xl mb-4">⚠️</div>
           <div className="text-xl font-semibold text-red-700 mb-2">Error</div>
           <div className="text-sm text-red-600">{error}</div>
         </div>
@@ -366,7 +368,7 @@ export default function RatingPage() {
 
   if (!authReady || !token || !serverUrl) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="flex items-center justify-center h-screen bg-white">
         <div className="text-center">
           <div className="text-4xl mb-4">Loading...</div>
           <div className="text-xl font-semibold text-gray-700">
@@ -381,14 +383,14 @@ export default function RatingPage() {
   }
 
   return (
-    <ClientOnly fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+    <ClientOnly fallback={<div className="flex items-center justify-center h-screen bg-white">Loading...</div>}>
       {() => (
         <RouteGuard nodeId="rating" roomId={roomId}>
-          <div className="min-h-screen flex flex-col bg-bolt-elements-bg-depth-1 overflow-hidden" data-meeting-rating-mode="true" data-theme="light">
+          <div className="min-h-screen flex flex-col bg-white overflow-hidden" data-theme="light">
             <VideoTileStrip token={token} serverUrl={serverUrl} roomName={roomId}>
               <MeetingAuthProvider>
                 {/* Two-box layout matching design page: header + content (1/3 sidebar, 2/3 workbench) */}
-                <div className="flex flex-col flex-1 min-h-0 h-full" data-theme="light">
+                <div className="flex flex-col flex-1 min-h-0 h-full bg-white" data-theme="light">
                   {/* Header - matching design page style */}
                   <header className="flex items-center justify-between px-4 h-[var(--header-height)] flex-shrink-0 border-b border-gray-300 bg-gray-100">
                     <div>

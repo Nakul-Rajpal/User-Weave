@@ -36,48 +36,37 @@ $zIndexMax: 999;
   z-index: $zIndexMax;
 }
 
-// Meeting modes: shared workbench layout and styling for design and rating pages
+// =============================================
+// Meeting Mode Styles (Design & Rating Pages)
+// =============================================
+// Shared layout: 33% sidebar/chat on left, 66% workbench on right
+// Video strip height is fixed at 6rem (96px) - MUST match VideoTileStrip.module.scss
+
+$video-strip-height: 6rem;
+
 [data-meeting-design-mode='true'],
 [data-meeting-rating-mode='true'] {
-  --workbench-width: 66.667% !important;
-  --workbench-inner-width: 66.667% !important;
-  --workbench-left: 33.333% !important;
+  // Define video strip height as CSS variable for consistency
+  --video-strip-height: #{$video-strip-height};
 
-  /* Header stays above workbench */
+  // Ensure header stays above workbench
   header {
     z-index: 100;
     position: relative;
   }
 
+  // Workbench positioning - right 2/3 of screen below video strip + header
   .z-workbench > div {
-    top: calc(6rem + var(--header-height, 54px) + 0.5rem) !important;
+    top: calc(var(--video-strip-height, #{$video-strip-height}) + var(--header-height, 54px) + 0.5rem) !important;
     bottom: 0.5rem !important;
     width: 66.667% !important;
     left: 33.333% !important;
     margin-left: 0 !important;
   }
 
-  /* No left/right padding so preview box is flush with sidebar */
+  // Remove padding so workbench is flush with sidebar
   .z-workbench > div > div {
     padding-left: 0 !important;
     padding-right: 0 !important;
-  }
-
-  /* Workbench container - white background */
-  .z-workbench > div > div > div {
-    background-color: white !important;
-    border-color: #d1d5db !important; /* gray-300 */
-  }
-
-  /* Workbench header bar - grey background */
-  .z-workbench > div > div > div > div:first-child {
-    background-color: #f3f4f6 !important; /* gray-100 */
-    border-color: #d1d5db !important; /* gray-300 */
-  }
-
-  /* Preview URL bar - white background */
-  .bg-bolt-elements-background-depth-2 {
-    background-color: white !important;
-    border-color: #d1d5db !important; /* gray-300 */
   }
 }

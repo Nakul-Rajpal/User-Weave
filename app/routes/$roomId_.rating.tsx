@@ -12,6 +12,7 @@ import { useAuth } from '~/components/auth/Auth';
 import Auth from '~/components/auth/Auth';
 import { useWorkflowStore } from '~/lib/stores/workflowStore';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { themeStore } from '~/lib/stores/theme';
 import RouteGuard from '~/components/meet/RouteGuard';
 import VideoTileStrip from '~/components/meet/VideoTileStrip';
 import { MeetingAuthProvider } from '~/components/meet/MeetingAuthProvider';
@@ -55,6 +56,23 @@ export default function RatingPage() {
   const [loadingMessage, setLoadingMessage] = useState('Loading workspace...');
 
   const { initializeWorkflow, cleanup, isHost, navigateToNode } = useWorkflowStore();
+
+  // Force light theme while on rating page (must stay readable)
+  useEffect(() => {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', 'light');
+    html.setAttribute('data-rating-page', 'true');
+    return () => {
+      html.removeAttribute('data-rating-page');
+      html.setAttribute('data-theme', themeStore.get());
+    };
+  }, []);
+
+  // Show workbench on mount (starts hidden, shows when design is selected)
+  useEffect(() => {
+    // Initially hide workbench - will show when user clicks "View Code"
+    workbenchStore.showWorkbench.set(false);
+  }, []);
 
   // Set username and userId from authenticated user
   useEffect(() => {

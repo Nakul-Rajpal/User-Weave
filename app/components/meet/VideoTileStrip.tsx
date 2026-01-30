@@ -34,8 +34,18 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
         className="flex flex-col min-h-screen"
         onDisconnected={() => navigate('/')}
       >
-        {/* Video tiles strip at top */}
-        <div className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-bolt-elements-bg-depth-1 flex-shrink-0`}>
+        {/* Video tiles strip at top - FIXED HEIGHT, cannot expand */}
+        <div
+          className={`${styles.videoTileStripContainer} border-b border-bolt-elements-borderColor bg-bolt-elements-bg-depth-1`}
+          style={{
+            height: '6rem',
+            maxHeight: '6rem',
+            minHeight: '6rem',
+            flexShrink: 0,
+            flexGrow: 0,
+            overflow: 'hidden'
+          }}
+        >
           <div className={styles.stripContent}>
             <div className={styles.tilesContainer}>
               <VideoTiles />
@@ -47,8 +57,8 @@ export default function VideoTileStrip({ token, serverUrl, roomName, children }:
           </div>
         </div>
 
-        {/* Render children inside LiveKitRoom context - fills remaining space, allow page scroll */}
-        <div className="flex-1 min-h-0">
+        {/* Render children inside LiveKitRoom context - fills remaining space */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           {children}
         </div>
       </LiveKitRoom>

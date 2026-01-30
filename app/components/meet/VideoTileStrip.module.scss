@@ -1,31 +1,51 @@
 // Custom styles for VideoTileStrip to constrain LiveKit components
-.videoTileStripContainer {
-  // Force strict height constraint - override LiveKit's height: 100%
-  height: 6rem; // 96px - reduced from 8rem for more content space
-  max-height: 6rem;
-  min-height: 6rem;
-  flex-shrink: 0; // Prevent flex container from shrinking this
-  overflow: hidden; // Prevent content from expanding beyond bounds
-  position: relative;
-  z-index: 10; // Ensure it doesn't overlay main content but stays above background
+// CRITICAL: This height MUST stay fixed regardless of participant count
+$video-strip-height: 6rem; // 96px
 
-  // Override LiveKit's .lk-room-container styles that apply height: 100%
-  :global(.lk-room-container) {
+.videoTileStripContainer {
+  // Force ABSOLUTE strict height constraint - no expansion allowed
+  height: $video-strip-height !important;
+  max-height: $video-strip-height !important;
+  min-height: $video-strip-height !important;
+  flex-shrink: 0 !important; // Prevent flex container from shrinking this
+  flex-grow: 0 !important; // Prevent flex container from growing this
+  overflow: hidden !important; // Prevent ANY content from expanding beyond bounds
+  position: relative;
+  z-index: 10;
+
+  // Override ALL LiveKit container styles
+  :global(.lk-room-container),
+  :global(.lk-focus-layout),
+  :global(.lk-focus-layout-container) {
     height: 100% !important;
     max-height: 100% !important;
     min-height: auto !important;
-    position: relative !important; // Prevent fixed positioning
+    position: relative !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+  }
+
+  // Hide LiveKit's participant count/connection indicators that might expand
+  :global(.lk-participant-tile),
+  :global(.lk-participant-placeholder) {
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  // Hide connection quality indicators that might add height
+  :global(.lk-connection-quality) {
+    display: none !important;
   }
 
   // Ensure control bar fits within the strip
   :global(.lk-control-bar) {
     padding: 0.25rem !important;
     height: auto !important;
+    max-height: 100% !important;
     min-height: auto !important;
-    background: transparent !important; // Inherit parent background
+    background: transparent !important;
+    flex-shrink: 0 !important;
   }
 
   // Make control bar buttons smaller to fit
@@ -53,29 +73,40 @@
     padding: 0.25rem !important;
   }
 
-  // Prevent LiveKit overlays from escaping or covering content
+  // Prevent LiveKit overlays from escaping - show ABOVE the strip
   :global(.lk-toast),
-  :global(.lk-device-menu) {
+  :global(.lk-device-menu),
+  :global(.lk-chat),
+  :global(.lk-participant-list) {
     position: absolute !important;
     top: auto !important;
-    bottom: 100% !important; // Show above the strip
-    z-index: 1000 !important; // Ensure they're visible when shown
+    bottom: 100% !important;
+    z-index: 1000 !important;
   }
 
   // Constrain grid layout if used
   :global(.lk-grid-layout) {
     height: 100% !important;
-    max-height: 6rem !important;
+    max-height: $video-strip-height !important;
+  }
+
+  // Hide any LiveKit elements that might cause expansion
+  :global(.lk-focus-toggle),
+  :global(.lk-start-audio),
+  :global(.lk-join-button) {
+    display: none !important;
   }
 }
 
 // Wrapper for content inside the strip
 .stripContent {
   height: 100%;
+  max-height: 100%;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
+  overflow: hidden; // Prevent any overflow
 }
 
 // Video tiles container
@@ -83,8 +114,17 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
+  overflow-y: hidden; // Prevent vertical overflow
   flex: 1;
   height: 100%;
+  max-height: 100%;
+  align-items: center; // Center tiles vertically
+
+  // Each video tile should be fixed size
+  > div {
+    flex-shrink: 0 !important;
+    max-height: calc(#{$video-strip-height} - 1rem) !important; // Account for padding
+  }
 
   // Hide scrollbar for cleaner look
   scrollbar-width: thin;
